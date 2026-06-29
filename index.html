@@ -179,18 +179,242 @@
     @media(max-width:1180px){html,body{overflow:auto;height:auto;min-height:100dvh}.app{height:auto;min-height:100dvh;overflow:visible}.main{height:auto;min-height:100dvh}.igPreviewWrap{grid-template-columns:1fr}.igPhone{max-width:380px}.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.nav{grid-template-columns:repeat(3,1fr)}.gridstats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.calendar{grid-template-columns:1fr}.calendarHead{display:none}.board{grid-template-columns:1fr 1fr}.topbar{flex-direction:column}.actions{justify-content:flex-start}.formgrid{grid-template-columns:1fr}.title h2{font-size:28px}.day{min-height:auto}}
     @media(max-width:720px){.main{padding:14px}.sidebar{padding:14px}.brand{padding:12px}.nav{grid-template-columns:1fr 1fr}.gridstats{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr;position:relative;top:auto}.board{grid-template-columns:1fr}.topbar{border-radius:22px;padding:14px}.title h2{font-size:25px}.actions .btn{flex:1}.calendar{gap:8px}.day{border-radius:18px}.modal{padding:16px;min-height:100vh}.modalHeader{margin:-16px -16px 16px;padding:18px 16px 12px}.modalHeader h3{font-size:28px}.logo{width:56px;height:56px}}
 
-    body.light{
-      --bg:#f5faf7;--bg2:#eef7f1;--surface:rgba(255,255,255,.82);--surface2:rgba(255,255,255,.92);--surface3:rgba(236,249,241,.96);--card:rgba(255,255,255,.92);--line:rgba(0,124,60,.16);--line2:rgba(0,0,0,.10);--text:#102016;--muted:#57705f;--soft:#143b24;--shadow:0 22px 70px rgba(14,60,34,.14);--shadow2:0 12px 32px rgba(14,60,34,.10);
-      background:radial-gradient(circle at 8% 8%,rgba(0,230,118,.18),transparent 30%),radial-gradient(circle at 92% 4%,rgba(87,255,155,.12),transparent 28%),linear-gradient(145deg,#f7fbf8 0%,#edf7f1 48%,#e4f3ea 100%);
+    body.light {
+      --bg: #f3f8f5;
+      --bg2: #ebf5ee;
+      --surface: rgba(255, 255, 255, 0.85);
+      --surface2: rgba(255, 255, 255, 0.95);
+      --surface3: rgba(230, 247, 236, 0.98);
+      --card: #ffffff;
+      --line: rgba(0, 124, 60, 0.14);
+      --line2: rgba(0, 0, 0, 0.08);
+      --text: #102016;
+      --muted: #4e6354;
+      --soft: #008e3c;
+      --shadow: 0 20px 60px rgba(14, 60, 34, 0.06);
+      --shadow2: 0 10px 24px rgba(14, 60, 34, 0.04);
+      background: 
+        radial-gradient(circle at 8% 8%, rgba(0, 230, 118, 0.14), transparent 30%), 
+        radial-gradient(circle at 92% 4%, rgba(87, 255, 155, 0.10), transparent 28%), 
+        linear-gradient(145deg, #f7fbf8 0%, #edf7f1 48%, #e4f3ea 100%);
     }
-    body.light .sidebar{background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(239,250,243,.82));box-shadow:12px 0 42px rgba(14,60,34,.08)}
-    body.light .brand, body.light .topbar, body.light .filters, body.light .stat, body.light .day, body.light .col, body.light .card, body.light .tablewrap, body.light .feedPanel, body.light .previewInfo, body.light .previewNotes{background:rgba(255,255,255,.82);color:var(--text)}
-    body.light .modalBackdrop{background:rgba(244,250,246,.96)}
-    body.light .modal{background:linear-gradient(180deg,#f8fcf9 0%,#eff8f2 100%);color:var(--text)}
-    body.light .modalHeader{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(244,250,246,.92))}
-    body.light input, body.light select, body.light textarea, body.light .filters input, body.light .filters select, body.light .modal input, body.light .modal select, body.light .modal textarea{background:rgba(255,255,255,.95);color:#102016;border-color:rgba(0,0,0,.12)}
-    body.light .btn, body.light .sidebar .toolbtn, body.light .nav button{color:var(--text)}
-    body.light .postpill{background:linear-gradient(135deg,rgba(0,200,83,.12),rgba(255,255,255,.75));color:var(--text)}
+
+    body.light .sidebar {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(240, 250, 244, 0.88));
+      box-shadow: 6px 0 30px rgba(14, 60, 34, 0.04);
+      border-right: 1px solid rgba(0, 124, 60, 0.1);
+    }
+
+    body.light .brand, 
+    body.light .topbar, 
+    body.light .filters, 
+    body.light .stat, 
+    body.light .day, 
+    body.light .col, 
+    body.light .card, 
+    body.light .tablewrap, 
+    body.light .feedPanel, 
+    body.light .previewInfo, 
+    body.light .previewNotes {
+      background: #ffffff;
+      color: #102016;
+      border-color: rgba(0, 124, 60, 0.12);
+      box-shadow: 0 4px 16px rgba(14, 60, 34, 0.03);
+    }
+
+    /* Botão comum no Light */
+    body.light .btn {
+      background: #ffffff;
+      border: 1px solid rgba(0, 124, 60, 0.22);
+      color: #102016;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.02);
+      backdrop-filter: none;
+    }
+    body.light .btn:hover {
+      background: #f0f7f3;
+      border-color: rgba(0, 230, 118, 0.45);
+      color: #008e3c;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 230, 118, 0.08);
+    }
+
+    /* Botão primário no Light */
+    body.light button.primary, 
+    body.light .btn.primary {
+      background: linear-gradient(135deg, #00e676, #00c853);
+      color: #ffffff;
+      border: none;
+      font-weight: 1000;
+      box-shadow: 0 6px 20px rgba(0, 200, 83, 0.22);
+    }
+    body.light button.primary:hover, 
+    body.light .btn.primary:hover {
+      background: linear-gradient(135deg, #39ff9c, #00e676);
+      color: #052013;
+      box-shadow: 0 8px 24px rgba(0, 200, 83, 0.3);
+    }
+
+    /* Botões da Sidebar / Navegação no Light */
+    body.light .nav button, 
+    body.light .sidebar .toolbtn {
+      color: #4e6354;
+      background: transparent;
+      border-color: transparent;
+    }
+    body.light .nav button:hover, 
+    body.light .sidebar .toolbtn:hover {
+      background: rgba(0, 124, 60, 0.06);
+      color: #007a33;
+      border-color: rgba(0, 124, 60, 0.12);
+      transform: translateX(3px);
+    }
+    body.light .nav button.active {
+      background: linear-gradient(135deg, rgba(0, 230, 118, 0.12), rgba(0, 200, 83, 0.04));
+      border-color: rgba(0, 230, 118, 0.25);
+      color: #007a33;
+      box-shadow: 0 6px 15px rgba(0, 230, 118, 0.04);
+    }
+
+    /* Post Preview Screen no Light (CORRIGE A TELA ESCURA) */
+    body.light .postPreviewScreen {
+      background: rgba(243, 248, 245, 0.97);
+      color: #102016;
+    }
+    body.light .previewTopbar h2 {
+      color: #102016;
+    }
+    body.light .previewInfo {
+      background: #ffffff;
+      border-color: rgba(0, 124, 60, 0.15);
+      box-shadow: 0 20px 50px rgba(14, 60, 34, 0.06);
+    }
+    body.light .previewInfo h3 {
+      color: #102016;
+    }
+    body.light .previewInfo p {
+      color: #4e6354;
+    }
+    body.light .previewInfo .bigcopy {
+      background: #f7fbf8;
+      border: 1px solid rgba(0, 124, 60, 0.15);
+      color: #102016;
+    }
+
+    /* Modal no Light */
+    body.light .modalBackdrop {
+      background: rgba(235, 245, 238, 0.85);
+      backdrop-filter: blur(8px);
+    }
+    body.light .modal {
+      background: #ffffff;
+      border: 1px solid rgba(0, 124, 60, 0.15);
+      color: #102016;
+      box-shadow: 0 30px 80px rgba(14, 60, 34, 0.15);
+    }
+    body.light .modalHeader {
+      background: linear-gradient(180deg, #ffffff, #f0f8f3);
+      border-bottom: 1px solid rgba(0, 124, 60, 0.1);
+      color: #102016;
+    }
+    body.light .modalHeader h3 {
+      color: #102016;
+    }
+    body.light .modal label {
+      color: #4e6354;
+    }
+
+    /* Inputs, Selects, Textareas no Light */
+    body.light input, 
+    body.light select, 
+    body.light textarea,
+    body.light .filters input, 
+    body.light .filters select, 
+    body.light .modal input, 
+    body.light .modal select, 
+    body.light .modal textarea {
+      background: #ffffff;
+      color: #102016;
+      border: 1px solid rgba(0, 124, 60, 0.22);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    body.light input:focus, 
+    body.light select:focus, 
+    body.light textarea:focus,
+    body.light .filters input:focus, 
+    body.light .filters select:focus, 
+    body.light .modal input:focus, 
+    body.light .modal select:focus, 
+    body.light .modal textarea:focus {
+      border-color: rgba(0, 230, 118, 0.55);
+      box-shadow: 0 0 0 4px rgba(0, 230, 118, 0.1);
+      background: #ffffff;
+    }
+
+    /* Help e Phase no Light */
+    body.light .help {
+      background: linear-gradient(135deg, rgba(0, 230, 118, 0.08), rgba(255, 255, 255, 0.9));
+      border: 1px solid rgba(0, 124, 60, 0.18);
+      color: #102016;
+      box-shadow: 0 8px 24px rgba(14, 60, 34, 0.02);
+    }
+    body.light .help h3 {
+      color: #007a33;
+    }
+    body.light .phase {
+      background: #ffffff;
+      border: 1px solid rgba(0, 124, 60, 0.12);
+      border-left: 6px solid var(--brand);
+      box-shadow: 0 4px 12px rgba(14, 60, 34, 0.02);
+    }
+    body.light .kbd {
+      background: #f0f7f3;
+      border-color: rgba(0, 124, 60, 0.2);
+      color: #007a33;
+    }
+
+    /* Postpill e Calendário no Light */
+    body.light .postpill {
+      background: linear-gradient(135deg, rgba(0, 200, 83, 0.06), #ffffff);
+      border: 1px solid rgba(0, 124, 60, 0.12);
+      color: #102016;
+      box-shadow: 0 4px 10px rgba(14, 60, 34, 0.03);
+    }
+    body.light .postpill:hover {
+      background: linear-gradient(135deg, rgba(0, 230, 118, 0.15), #ffffff);
+      border-color: rgba(0, 230, 118, 0.35);
+      transform: translateX(2px);
+    }
+    body.light .daynum {
+      color: #4e6354;
+    }
+    body.light .day.out {
+      background: rgba(0, 0, 0, 0.015);
+    }
+
+    /* Mockups no Light */
+    body.light .phoneFrame {
+      box-shadow: 0 20px 50px rgba(14, 60, 34, 0.06);
+    }
+    body.light .profileMock {
+      background: #ffffff;
+      border-color: #eee;
+    }
+    body.light .profileTop, 
+    body.light .profileMock span, 
+    body.light .profileMock b, 
+    body.light .profileBio {
+      color: #111;
+    }
+    body.light .profileTab {
+      background: #ffffff;
+      color: #667;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+    body.light .profileTab.active {
+      color: #111;
+      background: #f1f5f3;
+    }
     .feedTile.dragging{opacity:.45;outline:3px solid var(--brand)}
     .feedTile.dropTarget{outline:3px solid var(--brand);transform:scale(.98)}
     .reorderHint{font-size:13px;color:var(--muted);margin-top:8px}.feedTile .orderTag{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.52);color:#fff;font-size:10px;border-radius:999px;padding:3px 7px;font-weight:900}
