@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeAcheiZAP Planner Local</title>
+  <style>
+    :root{
+      --bg:#06120d;
+      --bg2:#0b1f16;
+      --surface:rgba(9,25,18,.72);
+      --surface2:rgba(14,37,27,.82);
+      --surface3:rgba(19,54,38,.88);
+      --card:rgba(17,48,34,.78);
+      --line:rgba(129,255,178,.16);
+      --line2:rgba(255,255,255,.10);
+      --text:#f4fff7;
+      --muted:#a9cbb7;
+      --soft:#dfffea;
+      --brand:#00e676;
+      --brand2:#00c853;
+      --brand3:#57ff9b;
+      --warn:#ffd166;
+      --danger:#ff5d77;
+      --blue:#7fb0ff;
+      --purple:#d899ff;
+      --pink:#ff86cb;
+      --shadow:0 24px 80px rgba(0,0,0,.34);
+      --shadow2:0 14px 36px rgba(0,0,0,.24);
+      --radius:24px;
+      --radius2:18px;
+      --blur:blur(18px);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;background:#06120d;overflow:hidden;height:100%;overscroll-behavior:none}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+      font-size:16px;
+      line-height:1.48;
+      background:
+        radial-gradient(circle at 8% 8%,rgba(0,230,118,.24),transparent 32%),
+        radial-gradient(circle at 92% 4%,rgba(87,255,155,.16),transparent 28%),
+        radial-gradient(circle at 54% 100%,rgba(127,176,255,.13),transparent 30%),
+        linear-gradient(145deg,#04100b 0%,#071611 43%,#10281d 100%);
+      min-height:100vh;
+      height:100dvh;
+      overflow:hidden;
+      overscroll-behavior:none;
+      background-attachment:fixed;
+    }
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+      background-size:42px 42px;
+      mask-image:linear-gradient(to bottom,rgba(0,0,0,.8),rgba(0,0,0,.08));
+      z-index:-1;
+    }
+    ::selection{background:rgba(0,230,118,.35)}
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-track{background:rgba(255,255,255,.04)}
+    ::-webkit-scrollbar-thumb{background:rgba(0,230,118,.33);border-radius:999px}
+    .app{display:grid;grid-template-columns:318px 1fr;height:100dvh;min-height:100dvh;gap:0;overflow:hidden}
+    .sidebar{
+      background:linear-gradient(180deg,rgba(5,16,11,.90),rgba(9,27,19,.76));
+      border-right:1px solid var(--line);
+      padding:22px 18px;
+      position:sticky;
+      top:0;
+      height:100dvh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      overscroll-behavior:contain;
+      backdrop-filter:var(--blur);
+      box-shadow:12px 0 60px rgba(0,0,0,.20);
+    }
+    .brand{
+      display:flex;align-items:center;gap:14px;margin-bottom:22px;padding:14px;
+      border:1px solid var(--line);border-radius:24px;
+      background:linear-gradient(135deg,rgba(0,230,118,.15),rgba(255,255,255,.04));
+      box-shadow:var(--shadow2);
+    }
+    .logo{
+      width:74px;height:74px;border-radius:22px;
+      background:#000;display:grid;place-items:center;overflow:hidden;
+      box-shadow:0 12px 38px rgba(0,230,118,.20), inset 0 1px 0 rgba(255,255,255,.10);
+      flex:0 0 auto;border:1px solid rgba(255,255,255,.08);
+    }
+    .logo img{width:100%;height:100%;object-fit:cover;display:block}
+    h1{font-size:19px;line-height:1.1;margin:0;letter-spacing:-.03em}
+    .tag{color:var(--muted);font-size:12px;margin-top:5px;font-weight:700}
+    .nav{display:grid;gap:7px}
+    .nav button,.sidebar .toolbtn{
+      width:100%;text-align:left;border:1px solid transparent;
+      background:transparent;color:var(--text);padding:13px 14px;border-radius:17px;cursor:pointer;margin:0;font-weight:850;
+      transition:.18s ease;position:relative;overflow:hidden;
+    }
+    .nav button:hover,.toolbtn:hover{background:rgba(255,255,255,.07);border-color:var(--line);transform:translateX(3px)}
+    .nav button.active{
+      background:linear-gradient(135deg,rgba(0,230,118,.20),rgba(0,200,83,.06));
+      border-color:rgba(0,230,118,.35);box-shadow:0 12px 30px rgba(0,230,118,.10);
+    }
+    .nav button.active:before{content:"";position:absolute;left:0;top:11px;bottom:11px;width:4px;border-radius:999px;background:var(--brand)}
+    .small{font-size:12px;color:var(--muted)}
+    .main{padding:28px;overflow-y:auto;overflow-x:hidden;max-width:1520px;width:100%;height:100dvh;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+    .topbar{
+      display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px;
+      background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(0,230,118,.05));
+      border:1px solid var(--line);border-radius:30px;padding:18px;backdrop-filter:var(--blur);box-shadow:var(--shadow2);
+    }
+    .title h2{margin:0;font-size:34px;line-height:1.03;letter-spacing:-.055em}
+    .title p{margin:7px 0 0;color:var(--muted);font-size:15px;max-width:720px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+    button.primary{background:linear-gradient(135deg,var(--brand3),var(--brand2));color:#052013;border:0;font-weight:1000;box-shadow:0 12px 34px rgba(0,230,118,.22)}
+    .btn{
+      border:1px solid var(--line);background:rgba(14,37,27,.84);color:var(--text);border-radius:15px;padding:12px 15px;cursor:pointer;font-weight:900;
+      transition:.18s ease;backdrop-filter:var(--blur);
+    }
+    .btn:hover{filter:brightness(1.08);transform:translateY(-1px);border-color:rgba(0,230,118,.35)}
+    .gridstats{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:13px;margin:18px 0}
+    .stat{
+      background:linear-gradient(145deg,rgba(19,54,38,.83),rgba(10,28,20,.70));
+      border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 15px;box-shadow:var(--shadow2);position:relative;overflow:hidden;
+    }
+    .stat:after{content:"";position:absolute;right:-24px;top:-24px;width:72px;height:72px;border-radius:999px;background:rgba(0,230,118,.12)}
+    .stat b{font-size:30px;display:block;letter-spacing:-.06em;line-height:1;color:var(--soft)}
+    .stat span{font-size:12px;color:var(--muted);font-weight:800}
+    .filters{
+      display:grid;grid-template-columns:1.45fr repeat(5,1fr);gap:10px;margin:14px 0 20px;
+      position:sticky;top:10px;z-index:20;background:rgba(6,18,13,.68);border:1px solid var(--line);border-radius:22px;padding:10px;backdrop-filter:var(--blur);
+    }
+    .filters input,.filters select,.modal input,.modal select,.modal textarea{
+      width:100%;padding:12px 13px;border-radius:15px;border:1px solid var(--line2);background:rgba(4,16,11,.86);color:var(--text);font-size:14px;outline:none;transition:.15s ease;
+    }
+    .filters input:focus,.filters select:focus,.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:rgba(0,230,118,.55);box-shadow:0 0 0 4px rgba(0,230,118,.08)}
+    .calendarHead{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:10px}
+    .calendarHead div{text-align:center;color:var(--muted);font-weight:1000;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+    .calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+    .day{
+      min-height:164px;background:linear-gradient(160deg,rgba(13,35,25,.82),rgba(8,24,17,.70));
+      border:1px solid var(--line);border-radius:22px;padding:10px;position:relative;box-shadow:0 10px 26px rgba(0,0,0,.14);transition:.18s ease;overflow:hidden;
+    }
+    .day:hover{transform:translateY(-2px);border-color:rgba(0,230,118,.30);box-shadow:0 18px 44px rgba(0,0,0,.22)}
+    .day.out{opacity:.38}.day.out:hover{opacity:.65}
+    .daynum{font-weight:1000;color:var(--muted);font-size:13px;margin-bottom:8px;display:flex;justify-content:space-between;text-transform:capitalize}
+    .postpill{
+      display:block;width:100%;text-align:left;border:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,rgba(0,230,118,.13),rgba(255,255,255,.035));
+      color:var(--text);border-radius:14px;padding:8px 9px;margin:6px 0;cursor:pointer;font-size:12px;transition:.15s ease;box-shadow:0 8px 18px rgba(0,0,0,.10)
+    }
+    .postpill:hover{background:linear-gradient(135deg,rgba(0,230,118,.22),rgba(255,255,255,.05));transform:translateX(2px)}
+    .pmeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:1000;border:1px solid rgba(255,255,255,.16);color:#06100d;background:var(--brand);letter-spacing:.02em}
+    .badge.ig{background:linear-gradient(135deg,#ff9bd5,#ff66b8)}.badge.wa{background:linear-gradient(135deg,#74ffa4,#00e676)}.badge.fb{background:linear-gradient(135deg,#9ec3ff,#6ca3ff)}.badge.off{background:linear-gradient(135deg,#ffe08a,#ffd166)}.badge.stat1{background:#bbd0c2}.badge.stat2{background:#78a6ff}.badge.stat3{background:#ffd166}.badge.stat4{background:#00e676}.badge.spon{background:linear-gradient(135deg,#ff7790,#ff3c62);color:#fff}
+    .board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.col{background:rgba(9,27,19,.62);border:1px solid var(--line);border-radius:24px;padding:14px;min-height:500px;backdrop-filter:var(--blur)}.col h3{margin:0 0 12px;font-size:18px;letter-spacing:-.02em}
+    .card{background:linear-gradient(160deg,rgba(25,67,47,.84),rgba(11,32,23,.78));border:1px solid var(--line);border-radius:20px;padding:14px;margin:11px 0;box-shadow:var(--shadow2);cursor:pointer;transition:.18s ease}.card:hover{transform:translateY(-3px);border-color:rgba(0,230,118,.36);box-shadow:0 24px 50px rgba(0,0,0,.26)}.card h4{margin:0 0 7px;letter-spacing:-.025em}.card p{color:var(--muted);font-size:13px;margin:7px 0}
+    .tablewrap{overflow:auto;background:rgba(9,27,19,.68);border:1px solid var(--line);border-radius:24px;backdrop-filter:var(--blur);box-shadow:var(--shadow2)}table{width:100%;border-collapse:collapse;min-width:1000px}th,td{padding:14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.03)}td{font-size:14px}tr:hover td{background:rgba(0,230,118,.035)}.empty{padding:32px;text-align:center;color:var(--muted)}
+    .modalBackdrop{display:none;position:fixed;inset:0;background:rgba(2,8,5,.98);z-index:130;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;backdrop-filter:blur(14px)}.modalBackdrop.show{display:block}.modal{width:100%;min-height:100vh;max-height:none;overflow:visible;background:linear-gradient(180deg,#07140e 0%,#0b1914 32%,#10251b 100%);border:0;border-radius:0;box-shadow:none;padding:24px 28px 36px}.modalHeader{display:flex;justify-content:space-between;align-items:center;margin:-24px -28px 18px;padding:22px 28px 14px;background:linear-gradient(180deg,rgba(6,18,13,.98),rgba(6,18,13,.88));border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}.modalHeader h3{margin:0;font-size:34px;letter-spacing:-.05em}.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;max-width:1180px}.full{grid-column:1/-1}label{font-size:12px;font-weight:1000;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}.modal textarea{min-height:92px;resize:vertical}.close{background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--text);font-size:24px;cursor:pointer;width:50px;height:50px;border-radius:18px}.close:hover{background:rgba(255,255,255,.12)}
+    .help{background:linear-gradient(135deg,rgba(0,230,118,.10),rgba(255,255,255,.04));border:1px solid rgba(0,230,118,.23);border-radius:24px;padding:18px;margin:12px 0;color:#dfffea;box-shadow:var(--shadow2)}.help h3{margin-top:0;font-size:22px;letter-spacing:-.035em}.phase{border-left:6px solid var(--brand);padding:17px;background:rgba(19,54,38,.66);border-radius:19px;margin:12px 0;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.phase b{font-size:18px}.kbd{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:#0a1511;border:1px solid var(--line);border-radius:8px;padding:2px 6px}.hidden{display:none!important}
+
+    /* V4 - mockups e prévias visuais */
+    .assetRow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:18px;padding:12px}
+    .assetThumb{display:none;width:78px;height:78px;border-radius:14px;object-fit:cover;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 24px rgba(0,0,0,.22)}
+    .assetThumb.show{display:block}.assetHint{color:var(--muted);font-size:12px}.miniLink{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:800}
+    .igPreviewWrap{display:grid;grid-template-columns:410px 1fr;gap:18px;margin-top:18px;align-items:start;max-width:1180px}.igPhone{background:#fff;border-radius:34px;padding:12px;box-shadow:0 24px 60px rgba(0,0,0,.42);color:#111;max-width:410px}.igPost{background:#fff;border-radius:24px;overflow:hidden;color:#111}.igTop{display:flex;align-items:center;gap:10px;padding:12px}.igAvatar{width:38px;height:38px;border-radius:999px;background:#000;display:grid;place-items:center;overflow:hidden;border:1px solid #e9e9e9}.igAvatar img{width:100%;height:100%;object-fit:cover;display:block}.igName{font-weight:900}.igLoc{font-size:12px;color:#666}.igMedia{aspect-ratio:1/1;background:#e8e8e8;display:grid;place-items:center;overflow:hidden}.igMedia img,.igMedia video{width:100%;height:100%;object-fit:cover}.carouselMock{position:relative;width:100%;height:100%;background:#111;overflow:hidden}.carouselSlide{display:none;width:100%;height:100%}.carouselSlide.active{display:block}.carouselSlide img,.carouselSlide video{width:100%;height:100%;object-fit:cover;display:block}.carouselNav{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;font-size:22px;cursor:pointer;display:grid;place-items:center;z-index:3}.carouselNav.prev{left:8px}.carouselNav.next{right:8px}.carouselDots{position:absolute;left:0;right:0;bottom:9px;display:flex;justify-content:center;gap:5px;z-index:3}.carouselDots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55)}.carouselDots span.active{background:#fff}.carouselCount{position:absolute;right:8px;top:8px;z-index:3;background:rgba(0,0,0,.55);color:#fff;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900}.assetThumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.assetThumbMini{width:56px;height:56px;border-radius:12px;overflow:hidden;background:#10251b;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);font-size:10px}.assetThumbMini img,.assetThumbMini video{width:100%;height:100%;object-fit:cover}.placeholder{width:100%;height:100%;display:grid;place-items:center;text-align:center;color:#667;background:linear-gradient(135deg,#e9ecef,#f8f9fa);font-weight:800}.igActions{display:flex;gap:12px;padding:12px;font-size:22px}.igCaption{padding:0 12px 14px;font-size:14px;line-height:1.38}.igMore{color:#777}.previewNotes{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:22px;padding:18px;color:var(--soft)}
+    .hoverPreview{position:fixed;z-index:80;display:none;width:300px;background:#fff;color:#111;border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.44);overflow:hidden;pointer-events:none;border:1px solid rgba(0,0,0,.08)}.hoverPreview.show{display:block}.hoverPreview img,.hoverPreview video{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#eee}.hpText{padding:10px 12px;font-size:12px;color:#222}.hasAssetDot{display:inline-block;width:9px;height:9px;background:#fff;border:2px solid var(--brand);border-radius:50%;box-shadow:0 0 0 4px rgba(0,230,118,.18);margin-right:2px}
+    .feedShell{display:grid;grid-template-columns:minmax(330px,480px) 1fr;gap:24px;align-items:start}.phoneFrame{background:#fff;color:#111;border-radius:42px;padding:14px;box-shadow:0 30px 85px rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.25)}.profileMock{background:#fff;border-radius:30px;overflow:hidden;min-height:720px}.profileTop{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eee;font-weight:900;font-size:18px}.profileHeader{display:grid;grid-template-columns:94px 1fr;gap:18px;padding:18px 16px}.profileLogo{width:86px;height:86px;border-radius:999px;background:#000;display:grid;place-items:center;overflow:hidden;border:2px solid #f0f0f0}.profileLogo img{width:100%;height:100%;object-fit:cover;display:block}.profileStats{display:grid;grid-template-columns:repeat(3,1fr);align-items:center;text-align:center}.profileStats b{font-size:18px}.profileBio{padding:0 16px 16px;font-size:14px;line-height:1.35}.profileTabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #eee;border-bottom:1px solid #eee}.profileTab{appearance:none;border:0;background:#fff;text-align:center;padding:10px 6px;color:#667;font-weight:800;display:grid;gap:4px;place-items:center;cursor:pointer;transition:.2s}.profileTab:hover{background:#f7f8f8;color:#222}.profileTab.active{color:#111;background:#f1f5f3}.profileTab.disabled{opacity:.42;cursor:default}.profileTab span{font-size:11px;font-weight:700}.feedGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;background:#fff;padding:3px}.feedTile{aspect-ratio:1/1;background:#dfe5e0;border:0;padding:0;cursor:pointer;overflow:hidden;position:relative;color:#fff}.feedTile img,.feedTile video{width:100%;height:100%;object-fit:cover;display:block}.feedTile.emptyTile{background:linear-gradient(135deg,#11251b,#00c853);display:grid;place-items:center;text-align:center;padding:8px;font-weight:900;font-size:12px}.feedTile:after{content:attr(data-type);position:absolute;right:6px;top:6px;background:rgba(0,0,0,.38);font-size:10px;border-radius:999px;padding:3px 7px;color:#fff}.feedSide{display:grid;gap:16px}.feedPanel{background:rgba(9,27,19,.68);border:1px solid var(--line);border-radius:26px;padding:20px;box-shadow:var(--shadow2)}.feedPanel h3{margin:0 0 8px;font-size:24px;letter-spacing:-.04em}.feedMiniList{display:grid;gap:10px}.feedMini{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:10px;background:rgba(255,255,255,.04);cursor:pointer}.feedMini:hover{border-color:rgba(0,230,118,.35);transform:translateY(-1px)}.feedMiniMedia{width:64px;height:64px;border-radius:12px;overflow:hidden;background:rgba(0,230,118,.18);display:grid;place-items:center;font-weight:900}.feedMiniMedia img,.feedMiniMedia video{width:100%;height:100%;object-fit:cover}.feedMiniMedia.brandLogoMini{background:#000}.feedMini b{display:block}.feedMini span{color:var(--muted);font-size:12px}
+    .postPreviewScreen{display:none;position:fixed;inset:0;z-index:120;background:rgba(2,8,5,.96);backdrop-filter:blur(14px);padding:24px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}.postPreviewScreen.show{display:block}.previewTopbar{display:flex;justify-content:space-between;gap:16px;align-items:center;max-width:1260px;margin:0 auto 18px}.previewTopbar h2{margin:0;font-size:30px;letter-spacing:-.04em}.previewFullGrid{max-width:1260px;margin:0 auto;display:grid;grid-template-columns:430px 1fr;gap:24px;align-items:start}.previewInfo{background:rgba(9,27,19,.78);border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:var(--shadow)}.previewInfo h3{font-size:28px;letter-spacing:-.04em;margin:0 0 10px}.previewInfo .bigcopy{white-space:pre-wrap;color:#dfffea;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}.fullMockPhone{background:#fff;border-radius:38px;padding:12px;color:#111;box-shadow:0 28px 80px rgba(0,0,0,.50)}.fullMockPhone .igPost{border:1px solid #eee}.previewBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    @media(max-width:980px){.feedShell,.previewFullGrid{grid-template-columns:1fr}.phoneFrame,.fullMockPhone{max-width:430px;margin:auto}.previewTopbar{align-items:flex-start;flex-direction:column}.postPreviewScreen{padding:14px}.feedSide{order:-1}}
+
+
+    .assetThumbMini{position:relative}
+    .assetThumbRemove{position:absolute;right:-6px;top:-6px;width:22px;height:22px;border-radius:999px;border:1px solid rgba(255,255,255,.45);background:rgba(0,0,0,.72);color:#fff;font-weight:900;cursor:pointer;display:grid;place-items:center;font-size:13px;line-height:1}
+    .assetThumbRemove:hover{background:#ff3c62}
+    .carouselHelp{display:block;margin-top:8px;color:var(--muted);font-size:12px;font-weight:800}
+
+    @media(max-width:1180px){html,body{overflow:auto;height:auto;min-height:100dvh}.app{height:auto;min-height:100dvh;overflow:visible}.main{height:auto;min-height:100dvh}.igPreviewWrap{grid-template-columns:1fr}.igPhone{max-width:380px}.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.nav{grid-template-columns:repeat(3,1fr)}.gridstats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.calendar{grid-template-columns:1fr}.calendarHead{display:none}.board{grid-template-columns:1fr 1fr}.topbar{flex-direction:column}.actions{justify-content:flex-start}.formgrid{grid-template-columns:1fr}.title h2{font-size:28px}.day{min-height:auto}}
+    @media(max-width:720px){.main{padding:14px}.sidebar{padding:14px}.brand{padding:12px}.nav{grid-template-columns:1fr 1fr}.gridstats{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr;position:relative;top:auto}.board{grid-template-columns:1fr}.topbar{border-radius:22px;padding:14px}.title h2{font-size:25px}.actions .btn{flex:1}.calendar{gap:8px}.day{border-radius:18px}.modal{padding:16px;min-height:100vh}.modalHeader{margin:-16px -16px 16px;padding:18px 16px 12px}.modalHeader h3{font-size:28px}.logo{width:56px;height:56px}}
+
+    body.light{
+      --bg:#f5faf7;--bg2:#eef7f1;--surface:rgba(255,255,255,.82);--surface2:rgba(255,255,255,.92);--surface3:rgba(236,249,241,.96);--card:rgba(255,255,255,.92);--line:rgba(0,124,60,.16);--line2:rgba(0,0,0,.10);--text:#102016;--muted:#57705f;--soft:#143b24;--shadow:0 22px 70px rgba(14,60,34,.14);--shadow2:0 12px 32px rgba(14,60,34,.10);
+      background:radial-gradient(circle at 8% 8%,rgba(0,230,118,.18),transparent 30%),radial-gradient(circle at 92% 4%,rgba(87,255,155,.12),transparent 28%),linear-gradient(145deg,#f7fbf8 0%,#edf7f1 48%,#e4f3ea 100%);
+    }
+    body.light .sidebar{background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(239,250,243,.82));box-shadow:12px 0 42px rgba(14,60,34,.08)}
+    body.light .brand, body.light .topbar, body.light .filters, body.light .stat, body.light .day, body.light .col, body.light .card, body.light .tablewrap, body.light .feedPanel, body.light .previewInfo, body.light .previewNotes{background:rgba(255,255,255,.82);color:var(--text)}
+    body.light .modalBackdrop{background:rgba(244,250,246,.96)}
+    body.light .modal{background:linear-gradient(180deg,#f8fcf9 0%,#eff8f2 100%);color:var(--text)}
+    body.light .modalHeader{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(244,250,246,.92))}
+    body.light input, body.light select, body.light textarea, body.light .filters input, body.light .filters select, body.light .modal input, body.light .modal select, body.light .modal textarea{background:rgba(255,255,255,.95);color:#102016;border-color:rgba(0,0,0,.12)}
+    body.light .btn, body.light .sidebar .toolbtn, body.light .nav button{color:var(--text)}
+    body.light .postpill{background:linear-gradient(135deg,rgba(0,200,83,.12),rgba(255,255,255,.75));color:var(--text)}
+    .feedTile.dragging{opacity:.45;outline:3px solid var(--brand)}
+    .feedTile.dropTarget{outline:3px solid var(--brand);transform:scale(.98)}
+    .reorderHint{font-size:13px;color:var(--muted);margin-top:8px}.feedTile .orderTag{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.52);color:#fff;font-size:10px;border-radius:999px;padding:3px 7px;font-weight:900}
+
+    @media print{.sidebar,.actions,.filters,.modalBackdrop{display:none!important}.app{display:block}.main{padding:0}.day{break-inside:avoid}.calendar{gap:5px}.postpill{border-color:#999;color:#000;background:#eee}body{background:white;color:#000}.stat,.day,.tablewrap,.col,.card,.help,.phase,.topbar{box-shadow:none;background:white;color:#000;border-color:#999}.badge{color:#000}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo"><img src="logo_oficial.png" alt="TeAcheiZAP"></div><div><h1>TeAcheiZAP Planner</h1><div class="tag">Sua lista telefônica no WhatsApp!</div></div></div>
+    <div class="nav">
+      <button class="active" data-view="dashboard">📊 Visão geral</button>
+      <button data-view="calendar">📅 Calendário</button>
+      <button data-view="kanban">🧩 Kanban</button>
+      <button data-view="list">📋 Lista completa</button>
+      <button data-view="feed">📱 Prévia do Feed</button>
+      <button data-view="strategy">🚀 Rota do lançamento</button>
+      <button data-view="settings">⚙️ Backup e uso</button>
+    </div>
+    <hr style="border-color:var(--line);border-style:solid;border-width:1px 0 0;margin:18px 0">
+    <button class="toolbtn" onclick="openModal()">+ Novo post</button>
+    <button class="toolbtn" onclick="toggleTheme()" id="themeBtn">☀️ Versão Light</button>
+    <button class="toolbtn" onclick="exportJSON()">⬇️ Backup JSON</button>
+    <button class="toolbtn" onclick="exportCSV()">⬇️ Exportar CSV</button>
+    <button class="toolbtn" onclick="window.print()">🖨️ Imprimir / PDF</button>
+    <p class="small">Tudo fica salvo no navegador deste computador pelo localStorage. Não precisa internet.</p>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div class="title"><h2 id="viewTitle">Visão geral</h2><p id="viewSub">Controle local do pré-lançamento, beta e lançamento do TeAcheiZAP.</p></div>
+      <div class="actions">
+        <button class="btn" onclick="prevMonth()">← Mês</button><button class="btn" id="monthLabel"></button><button class="btn" onclick="nextMonth()">Mês →</button><button class="btn primary" onclick="openModal()">+ Criar post</button>
+      </div>
+    </div>
+    <section id="stats" class="gridstats"></section>
+    <section id="filters" class="filters">
+      <input id="q" placeholder="Buscar por título, copy, categoria..." oninput="render()" />
+      <select id="fPlatform" onchange="render()"><option value="">Canal</option><option>Instagram</option><option>WhatsApp</option><option>Facebook</option><option>Offline</option></select>
+      <select id="fStatus" onchange="render()"><option value="">Status</option><option>Ideia</option><option>Produzindo</option><option>Agendado</option><option>Publicado</option></select>
+      <select id="fPhase" onchange="render()"><option value="">Fase</option><option>Autoridade</option><option>Curiosidade</option><option>Engajamento</option><option>Cadastro grátis</option><option>Beta</option><option>Lançamento</option></select>
+      <select id="fSponsor" onchange="render()"><option value="">Patrocínio</option><option value="sim">Patrocinar</option><option value="nao">Orgânico</option></select>
+      <select id="fType" onchange="render()"><option value="">Formato</option><option>Reels</option><option>Stories</option><option>Carrossel</option><option>Post estático</option><option>Mensagem</option><option>Evento</option><option>Offline</option></select>
+    </section>
+    <section id="content"></section>
+  </main>
+</div>
+<div class="modalBackdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="modalHeader"><h3 id="modalTitle">Novo post</h3><button class="close" onclick="closeModal()">×</button></div>
+    <input type="hidden" id="postId" />
+    <div class="formgrid">
+      <div><label>Data</label><input type="date" id="date"></div><div><label>Horário</label><input type="time" id="time"></div>
+      <div><label>Canal</label><select id="platform"><option>Instagram</option><option>WhatsApp</option><option>Facebook</option><option>Offline</option></select></div>
+      <div><label>Formato</label><select id="type"><option>Reels</option><option>Stories</option><option>Carrossel</option><option>Post estático</option><option>Mensagem</option><option>Evento</option><option>Offline</option></select></div>
+      <div><label>Fase</label><select id="phase"><option>Autoridade</option><option>Curiosidade</option><option>Engajamento</option><option>Cadastro grátis</option><option>Beta</option><option>Lançamento</option></select></div>
+      <div><label>Status</label><select id="status"><option>Ideia</option><option>Produzindo</option><option>Agendado</option><option>Publicado</option></select></div>
+      <div class="full"><label>Título</label><input id="title" placeholder="Ex: Você conhece alguém que trabalha bem?"></div>
+      <div class="full"><label>Gancho</label><input id="hook" placeholder="Primeira frase do vídeo/post"></div>
+      <div class="full"><label>Copy / legenda / mensagem</label><textarea id="copy"></textarea></div>
+      <div class="full"><label>Roteiro visual / cena</label><textarea id="visual"></textarea></div>
+      <div class="full"><label>Arte pronta / criativo</label><div class="assetRow"><img id="assetThumb" class="assetThumb" alt="Prévia da arte"><input type="file" id="assetFile" accept="image/*,video/*" multiple onchange="handleAssetUpload(event)"><button type="button" class="miniLink" onclick="document.getElementById('assetFile').click()">Adicionar mais slides</button><button type="button" class="miniLink" onclick="removeAsset()">Remover tudo</button><span id="assetName" class="assetHint">Você pode selecionar vários arquivos de uma vez ou adicionar um por um. Para carrossel, cada imagem vira um slide.</span><input type="hidden" id="assetData"><input type="hidden" id="assetType"><input type="hidden" id="assetFileName"><input type="hidden" id="assetItems"></div></div>
+      <div><label>CTA</label><input id="cta" placeholder="Comente EU CONHEÇO / Chame no WhatsApp"></div>
+      <div><label>Patrocinar?</label><select id="sponsor"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+      <div><label>Prioridade</label><select id="priority"><option>Normal</option><option>Alta</option><option>Urgente</option></select></div>
+      <div><label>Responsável</label><input id="owner" placeholder="Douglas / Designer / Editor"></div>
+      <div class="full"><label>Observações</label><textarea id="notes"></textarea></div>
+    </div>
+    <div class="igPreviewWrap">
+      <div class="igPhone"><div class="igPost" id="igPreview"></div></div>
+      <div class="previewNotes"><b>Pré-visualização estilo Instagram</b><p>Use para conferir se a arte, o gancho, a legenda e o CTA parecem bons antes de publicar. Quando o post tiver arte, passe o mouse em cima dele para ver a prévia rápida. Ao clicar, abre em tela inteira com mockup do Instagram.</p><button class="btn" type="button" onclick="updatePostPreview()">Atualizar prévia</button></div>
+    </div>
+    <div class="actions" style="margin-top:16px"><button class="btn primary" onclick="savePost()">Salvar</button><button class="btn" onclick="duplicatePost()">Duplicar</button><button class="btn" onclick="deletePost()">Excluir</button></div>
+  </div>
+</div>
+<div class="hoverPreview" id="hoverPreview"></div>
+<div class="postPreviewScreen" id="postPreviewScreen"></div>
+<script>
+const BRAND_LOGO = "logo_oficial.png";
+const seedPosts = [
+ {date:'2026-07-01',time:'09:00',platform:'Instagram',type:'Reels',phase:'Autoridade',status:'Ideia',title:'Você conhece alguém que trabalha bem?',hook:'Você conhece alguém que trabalha bem, mas quase ninguém encontra?',copy:'Tem muita gente boa perdendo serviço porque ninguém acha o contato. Estamos criando uma forma simples de colocar esses profissionais no mapa. TeAcheiZAP, sua lista telefônica no WhatsApp! Comente EU CONHEÇO.',visual:'Pessoa falando direto para câmera, linguagem de rua, cortes rápidos com prints simulados de pedidos de contato em grupos.',cta:'Comente EU CONHEÇO',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Post-mãe da campanha. Fixar no perfil se performar bem.'},
+ {date:'2026-07-01',time:'18:00',platform:'WhatsApp',type:'Mensagem',phase:'Autoridade',status:'Ideia',title:'Mensagem de apresentação sem vender',hook:'Estamos montando uma lista útil de contatos da cidade.',copy:'Pessoal, estou ajudando a montar uma lista de contatos úteis no WhatsApp. A ideia é facilitar quando alguém precisar de diarista, pedreiro, eletricista, comércio, produto ou serviço. Se você conhece alguém que trabalha bem, me indica aqui.',visual:'Enviar em grupos com permissão ou contatos próximos. Sem link de venda.',cta:'Me indique alguém bom',sponsor:'nao',priority:'Alta',owner:'Douglas',notes:'Não usar como spam. Adaptar para cada grupo.'},
+ {date:'2026-07-02',time:'12:00',platform:'Instagram',type:'Stories',phase:'Engajamento',status:'Ideia',title:'Enquete: qual contato você sempre precisa?',hook:'Qual contato você mais sofre para achar?',copy:'Caixa de perguntas: “Qual contato você sempre precisa e nunca acha na hora?”',visual:'Stories com enquete: diarista / pedreiro / eletricista / pizzaria / outro.',cta:'Responda nos stories',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Usar respostas para criar próximos conteúdos.'},
+ {date:'2026-07-03',time:'10:00',platform:'Instagram',type:'Carrossel',phase:'Curiosidade',status:'Ideia',title:'A cidade ainda procura contato do jeito antigo',hook:'Todo mundo já passou por isso.',copy:'Slide 1: Você precisa de um contato urgente. Slide 2: Pergunta no grupo. Slide 3: Ninguém responde. Slide 4: Quando responde, o número está errado. Slide 5: E se isso pudesse ser resolvido no WhatsApp?',visual:'Design moderno com prints simulados de conversas.',cta:'Siga para acompanhar',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Criar curiosidade sem explicar tudo ainda.'},
+ {date:'2026-07-04',time:'16:00',platform:'Facebook',type:'Post estático',phase:'Engajamento',status:'Ideia',title:'Pergunta nos grupos/páginas',hook:'Leme, qual profissional não pode faltar em uma lista de contatos?',copy:'Estamos levantando quais serviços a cidade mais precisa encontrar com facilidade. Comente uma categoria ou marque alguém que trabalha bem.',visual:'Imagem simples com a pergunta grande.',cta:'Comente ou marque alguém',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Publicar nas páginas da lista com texto personalizado.'},
+ {date:'2026-07-05',time:'11:00',platform:'Instagram',type:'Reels',phase:'Autoridade',status:'Ideia',title:'O contato que some quando a gente mais precisa',hook:'Na hora que você precisa, o contato simplesmente desaparece.',copy:'Sabe o número do cara que arruma portão? E a diarista? E o freteiro? A cidade precisa de uma lista fácil, no lugar que todo mundo já usa: WhatsApp.',visual:'Humor: pessoa revirando conversas antigas, grupos e agenda do celular.',cta:'Marque alguém que precisa disso',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Boa chance de compartilhamento.'},
+ {date:'2026-07-06',time:'09:00',platform:'Instagram',type:'Reels',phase:'Cadastro grátis',status:'Ideia',title:'200 profissionais grátis',hook:'Se você trabalha bem, essa pode ser sua chance de aparecer mais.',copy:'Vamos abrir cadastro grátis para os 200 primeiros profissionais da cidade ajudarem a formar a primeira base do TeAcheiZAP. Diarista, pedreiro, manicure, eletricista, freteiro, confeiteira, técnico, todo mundo que trabalha bem pode participar.',visual:'Douglas falando com energia, texto na tela: 200 profissionais grátis.',cta:'Comente QUERO APARECER',sponsor:'sim',priority:'Urgente',owner:'Douglas',notes:'Começa captação de profissionais.'},
+ {date:'2026-07-07',time:'18:00',platform:'WhatsApp',type:'Mensagem',phase:'Cadastro grátis',status:'Ideia',title:'Convite para profissional grátis',hook:'Você conhece alguém que trabalha bem?',copy:'Estou cadastrando gratuitamente os primeiros 200 profissionais no TeAcheiZAP. É para ajudar a cidade a encontrar contatos úteis pelo WhatsApp. Se você conhece alguém que trabalha bem e precisa aparecer mais, me manda o contato.',visual:'Mensagem curta para contatos e grupos.',cta:'Me mande o contato',sponsor:'nao',priority:'Alta',owner:'Douglas',notes:'Usar com moderação.'},
+ {date:'2026-07-08',time:'12:00',platform:'Instagram',type:'Stories',phase:'Autoridade',status:'Ideia',title:'Prova social dos indicados',hook:'Olha quantas pessoas já estão indicando profissionais.',copy:'Mostrar prints borrados de indicações recebidas. Texto: “A cidade tem muita gente boa. Só faltava organizar.”',visual:'Stories em sequência com prints, caixa de pergunta no fim.',cta:'Indique alguém',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Ocultar dados pessoais.'},
+ {date:'2026-07-09',time:'10:00',platform:'Instagram',type:'Reels',phase:'Autoridade',status:'Ideia',title:'Pessoa real: diarista',hook:'Ela trabalha bem, mas depende só de indicação.',copy:'Mini-história: “Tem profissional que é excelente, mas vive esperando alguém lembrar do contato. O TeAcheiZAP nasce para facilitar esse encontro.”',visual:'Entrevista simples com pessoa real ou encenação realista sem expor dados.',cta:'Conhece alguém assim? Comente',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Pedir autorização de imagem se for real.'},
+ {date:'2026-07-10',time:'17:00',platform:'Instagram',type:'Carrossel',phase:'Autoridade',status:'Ideia',title:'7 profissionais que todo bairro precisa ter',hook:'Todo bairro precisa desses contatos salvos.',copy:'Diarista, eletricista, encanador, manicure, freteiro, pedreiro, técnico de celular. Agora imagina isso em uma lista no WhatsApp.',visual:'Carrossel com ícones e frases curtas.',cta:'Salve e envie para alguém',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Conteúdo evergreen.'},
+ {date:'2026-07-11',time:'09:00',platform:'Offline',type:'Evento',phase:'Engajamento',status:'Ideia',title:'Rua: pesquisa rápida',hook:'Qual contato você mais precisa achar?',copy:'Abordagem de rua: “Estamos criando uma lista telefônica no WhatsApp. Qual contato você mais sente falta?”',visual:'Gravar respostas curtas com autorização.',cta:'Siga o Instagram',sponsor:'nao',priority:'Alta',owner:'Douglas',notes:'Coletar conteúdo real e autorização.'},
+ {date:'2026-07-12',time:'12:00',platform:'Instagram',type:'Reels',phase:'Engajamento',status:'Ideia',title:'Respostas da rua',hook:'A gente perguntou na rua: qual contato você mais sofre para achar?',copy:'Compilado de respostas reais. Final: “É por isso que o TeAcheiZAP está chegando.”',visual:'Cortes rápidos, legendas grandes, linguagem popular.',cta:'Comente qual contato falta',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Esse pode ser um campeão de engajamento.'},
+ {date:'2026-07-13',time:'10:00',platform:'Instagram',type:'Reels',phase:'Cadastro grátis',status:'Ideia',title:'50 comércios parceiros grátis',hook:'Tem comércio local que muita gente ama, mas nem sempre lembra o WhatsApp.',copy:'Vamos cadastrar gratuitamente 50 comércios parceiros para ajudar a cidade a encontrar serviços, produtos e atendimento no WhatsApp.',visual:'Cenas de fachada de comércios, balcão, atendimento, sacolas.',cta:'Comente COMÉRCIO',sponsor:'sim',priority:'Urgente',owner:'Douglas',notes:'Foco em collab no futuro.'},
+ {date:'2026-07-14',time:'18:00',platform:'WhatsApp',type:'Mensagem',phase:'Cadastro grátis',status:'Ideia',title:'Mensagem para comércio',hook:'Estamos selecionando 50 comércios parceiros.',copy:'Oi, tudo bem? Estamos montando a primeira lista telefônica local no WhatsApp, o TeAcheiZAP. Vamos cadastrar gratuitamente 50 comércios parceiros para a fase inicial. A ideia é ajudar moradores a encontrar produtos, serviços e atendimento de forma simples. Posso te colocar na lista?',visual:'Enviar individual para comércios próximos.',cta:'Posso te colocar na lista?',sponsor:'nao',priority:'Alta',owner:'Douglas',notes:'Personalizar com nome do comércio.'},
+ {date:'2026-07-15',time:'11:00',platform:'Instagram',type:'Stories',phase:'Engajamento',status:'Ideia',title:'Caixa: indique comércio',hook:'Qual comércio não pode faltar no TeAcheiZAP?',copy:'Stories com caixa de perguntas. Depois marcar alguns comércios indicados.',visual:'Fundo verde, pergunta grande.',cta:'Indique um comércio',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Pode gerar marcações orgânicas.'},
+ {date:'2026-07-16',time:'12:00',platform:'Instagram',type:'Reels',phase:'Curiosidade',status:'Ideia',title:'Não é aplicativo',hook:'Não precisa baixar nada.',copy:'O jeito mais fácil de uma cidade encontrar contatos úteis não precisa ser complicado. Se já está todo mundo no WhatsApp, a solução também precisa estar lá.',visual:'Pessoa apagando vários apps da tela e abrindo WhatsApp.',cta:'Siga para ver como vai funcionar',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Quebra objeção.'},
+ {date:'2026-07-17',time:'10:00',platform:'Facebook',type:'Post estático',phase:'Cadastro grátis',status:'Ideia',title:'Chamada para 200 profissionais',hook:'Você é profissional autônomo em Leme?',copy:'Estamos cadastrando gratuitamente os primeiros 200 profissionais para a fase inicial do TeAcheiZAP. Quer aparecer quando alguém procurar pelo seu serviço no WhatsApp? Chame no privado.',visual:'Arte direta com benefício.',cta:'Chame no privado',sponsor:'nao',priority:'Alta',owner:'Douglas',notes:'Usar lista de páginas do Facebook.'},
+ {date:'2026-07-18',time:'16:00',platform:'Offline',type:'Evento',phase:'Engajamento',status:'Ideia',title:'Roleta sem sorteio ilegal',hook:'Gire a roleta e indique um profissional bom.',copy:'Ação de rua: para participar, seguir o Instagram e comentar marcando ou indicando uma categoria. Brindes simples de participação, sem mecânica de sorteio complexa.',visual:'Roleta com categorias: diarista, oficina, beleza, comida, frete.',cta:'Siga e comente',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Validar regras de promoção antes de premiação.'},
+ {date:'2026-07-19',time:'12:00',platform:'Instagram',type:'Reels',phase:'Engajamento',status:'Ideia',title:'Roleta na rua',hook:'A roleta do TeAcheiZAP revelou o que a cidade mais procura.',copy:'Mostrar pessoas participando e categorias mais citadas. Final: “Isso vai virar uma lista no WhatsApp.”',visual:'Cortes da ação de rua, reações reais.',cta:'Siga o TeAcheiZAP',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Conteúdo de autoridade local.'},
+ {date:'2026-07-20',time:'09:00',platform:'Instagram',type:'Carrossel',phase:'Autoridade',status:'Ideia',title:'A cidade tem solução, só falta organizar',hook:'O problema não é falta de profissional.',copy:'O problema é que os contatos estão espalhados: grupo, agenda, print antigo, indicação, boca a boca. O TeAcheiZAP vem para organizar isso no WhatsApp.',visual:'Slides com a jornada do usuário.',cta:'Compartilhe com alguém',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Educação do mercado.'},
+ {date:'2026-07-21',time:'18:00',platform:'WhatsApp',type:'Mensagem',phase:'Engajamento',status:'Ideia',title:'Pedido de indicação por categoria',hook:'Hoje estamos buscando contatos de beleza.',copy:'Hoje estamos levantando bons contatos de beleza: manicure, cabelo, sobrancelha, maquiagem. Você conhece alguém que trabalha bem e merece aparecer mais?',visual:'Enviar em grupos com contexto.',cta:'Me indica alguém',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Rodar por categorias durante a semana.'},
+ {date:'2026-07-22',time:'10:00',platform:'Instagram',type:'Reels',phase:'Autoridade',status:'Ideia',title:'O amigo que precisa muito',hook:'Você tem um amigo que trabalha muito, mas vende pouco?',copy:'Às vezes a pessoa não precisa de mil seguidores. Ela precisa ser encontrada por quem já está procurando o serviço dela.',visual:'Tom emocional, pessoa olhando agenda vazia / depois recebendo mensagem.',cta:'Marca esse amigo',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Forte para marcação.'},
+ {date:'2026-07-23',time:'12:00',platform:'Instagram',type:'Stories',phase:'Engajamento',status:'Ideia',title:'Ranking parcial',hook:'As categorias mais pedidas até agora.',copy:'Mostrar top 5 categorias mais indicadas/pedidas. Chamar para completar a lista.',visual:'Stories com ranking.',cta:'Qual falta?',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Cria sensação de movimento.'},
+ {date:'2026-07-24',time:'10:00',platform:'Instagram',type:'Reels',phase:'Curiosidade',status:'Ideia',title:'Como vai funcionar',hook:'Vai ser simples assim.',copy:'Você chama no WhatsApp, diz o que procura e encontra contatos úteis da cidade. Para quem trabalha ou tem comércio, é uma chance de aparecer quando alguém precisar.',visual:'Simulação de conversa no WhatsApp com tela animada.',cta:'Entre na lista beta',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Explica sem vender plano.'},
+ {date:'2026-07-25',time:'10:00',platform:'Offline',type:'Offline',phase:'Autoridade',status:'Ideia',title:'Displays L nos parceiros',hook:'Estamos no TeAcheiZAP.',copy:'Colocar displays L nos 50 comércios parceiros com QR Code para seguir e entrar na lista.',visual:'Display com frase: “Precisou de um contato? TeAcheiZAP, sua lista telefônica no WhatsApp!”',cta:'Aponte a câmera',sponsor:'nao',priority:'Alta',owner:'Douglas',notes:'Precisa de impressão simples.'},
+ {date:'2026-07-26',time:'12:00',platform:'Instagram',type:'Reels',phase:'Autoridade',status:'Ideia',title:'Comércio parceiro',hook:'Esse comércio já entrou para ajudar a cidade.',copy:'Post colaborativo com comércio gratuito parceiro. “A cidade fica mais forte quando bons negócios são encontrados.”',visual:'Vídeo curto no comércio, dono acenando, fachada, QR Code.',cta:'Conhece um comércio? Indique',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Começar collabs.'},
+ {date:'2026-07-27',time:'09:00',platform:'Instagram',type:'Reels',phase:'Cadastro grátis',status:'Ideia',title:'Últimos dias dos cadastros grátis',hook:'Os cadastros grátis da fase beta estão acabando.',copy:'Se você trabalha bem ou tem um comércio local, essa é a hora de entrar na primeira fase do TeAcheiZAP. Depois do beta, entram os planos fundadores.',visual:'Douglas com texto na tela e contagem.',cta:'Comente QUERO',sponsor:'sim',priority:'Urgente',owner:'Douglas',notes:'Urgência real.'},
+ {date:'2026-07-28',time:'18:00',platform:'WhatsApp',type:'Mensagem',phase:'Cadastro grátis',status:'Ideia',title:'Última chamada profissionais grátis',hook:'Últimos dias para entrar grátis.',copy:'Estamos fechando a lista dos primeiros profissionais gratuitos do TeAcheiZAP. Se você conhece alguém que trabalha bem e precisa aparecer mais, me manda agora para eu tentar colocar na fase beta.',visual:'Mensagem curta.',cta:'Me manda agora',sponsor:'nao',priority:'Alta',owner:'Douglas',notes:'Enviar para contatos mais próximos.'},
+ {date:'2026-07-29',time:'12:00',platform:'Instagram',type:'Carrossel',phase:'Beta',status:'Ideia',title:'O que é a fase beta?',hook:'Antes de abrir para todo mundo, vamos testar com a cidade.',copy:'Explicar: cadastrar contatos, testar buscas, ajustar categorias, ouvir usuários e preparar lançamento.',visual:'Carrossel didático simples.',cta:'Entre na lista beta',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Transparência gera confiança.'},
+ {date:'2026-07-30',time:'10:00',platform:'Instagram',type:'Reels',phase:'Beta',status:'Ideia',title:'Beta abre em breve',hook:'A primeira versão do TeAcheiZAP está quase pronta para a cidade testar.',copy:'Não é sobre tecnologia bonita. É sobre resolver uma dor real: achar contatos úteis quando você precisa.',visual:'Bastidores, tela do WhatsApp, organização de categorias.',cta:'Siga e ative as notificações',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Aquecer para beta.'},
+ {date:'2026-07-31',time:'18:00',platform:'Instagram',type:'Live',phase:'Engajamento',status:'Ideia',title:'Live de apresentação + prêmios simples',hook:'Vamos mostrar o que estamos criando para Leme.',copy:'Live curta: apresentar ideia, mostrar categorias, agradecer indicações, chamar beta. Prêmios/brindes devem ser de participação ou com regra validada.',visual:'Douglas ao vivo, convidado real se possível.',cta:'Comente BETA',sponsor:'nao',priority:'Normal',owner:'Douglas',notes:'Cuidado com sorteio/promoção comercial.'},
+ {date:'2026-08-03',time:'09:00',platform:'Instagram',type:'Reels',phase:'Beta',status:'Ideia',title:'Beta gratuito aberto',hook:'Agora é oficial: o beta do TeAcheiZAP começou.',copy:'A fase beta gratuita está aberta para testar a lista telefônica no WhatsApp. Usuários podem entrar para testar. Profissionais e comércios parceiros entram para formar a base.',visual:'Vídeo animado com fluxo no WhatsApp.',cta:'Chame no WhatsApp',sponsor:'sim',priority:'Urgente',owner:'Douglas',notes:'Data sugerida para beta.'},
+ {date:'2026-08-03',time:'18:00',platform:'WhatsApp',type:'Mensagem',phase:'Beta',status:'Ideia',title:'Mensagem abertura beta',hook:'O beta começou.',copy:'O TeAcheiZAP começou a fase beta. A ideia é testar uma lista telefônica local direto no WhatsApp. Se quiser procurar contatos ou cadastrar seu serviço gratuitamente nessa fase inicial, me chama aqui.',visual:'Mensagem de broadcast manual para contatos autorizados.',cta:'Me chama aqui',sponsor:'nao',priority:'Alta',owner:'Douglas',notes:'Enviar individualmente.'},
+ {date:'2026-08-10',time:'09:00',platform:'Instagram',type:'Reels',phase:'Lançamento',status:'Ideia',title:'Planos fundadores em breve',hook:'Depois do beta, quem quiser continuar aparecendo terá uma condição fundadora.',copy:'Os primeiros profissionais e comércios ajudaram a formar a base. Agora vamos abrir os planos fundadores para quem quer continuar sendo encontrado no WhatsApp.',visual:'Tom de oportunidade, não agressivo.',cta:'Entre na lista de fundadores',sponsor:'sim',priority:'Alta',owner:'Douglas',notes:'Preparar comercialização.'},
+ {date:'2026-08-24',time:'09:00',platform:'Instagram',type:'Reels',phase:'Lançamento',status:'Ideia',title:'Lançamento comercial',hook:'Abriram os planos fundadores do TeAcheiZAP.',copy:'Se você trabalha bem, tem comércio ou quer anunciar um produto, chegou a hora de aparecer quando alguém procurar pelo que você oferece no WhatsApp.',visual:'Vídeo de abertura oficial, com provas do beta.',cta:'Chame no WhatsApp e ative seu plano',sponsor:'sim',priority:'Urgente',owner:'Douglas',notes:'Lançamento comercial oficial.'}
+];
+let posts = JSON.parse(localStorage.getItem('tz_posts')||'null') || seedPosts.map((p,i)=>({...p,id:'p'+(Date.now()+i)}));
+let current = new Date('2026-07-01T12:00:00');let view='dashboard';
+function save(){localStorage.setItem('tz_posts',JSON.stringify(posts));}
+function filtered(){const q=document.getElementById('q')?.value?.toLowerCase()||'';const fp=document.getElementById('fPlatform')?.value||'';const fs=document.getElementById('fStatus')?.value||'';const fph=document.getElementById('fPhase')?.value||'';const fsp=document.getElementById('fSponsor')?.value||'';const ft=document.getElementById('fType')?.value||'';return posts.filter(p=>(!q||JSON.stringify(p).toLowerCase().includes(q))&&(!fp||p.platform==fp)&&(!fs||p.status==fs)&&(!fph||p.phase==fph)&&(!fsp||p.sponsor==fsp)&&(!ft||p.type==ft)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));}
+function setView(v){view=v;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==v));applyTheme();render();}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+function stats(){const f=filtered();const total=f.length;const ag=f.filter(p=>p.status=='Agendado').length;const pub=f.filter(p=>p.status=='Publicado').length;const pat=f.filter(p=>p.sponsor=='sim').length;const ig=f.filter(p=>p.platform=='Instagram').length;document.getElementById('stats').innerHTML=`<div class="stat"><b>${total}</b><span>Posts no filtro</span></div><div class="stat"><b>${ig}</b><span>Instagram</span></div><div class="stat"><b>${ag}</b><span>Agendados</span></div><div class="stat"><b>${pub}</b><span>Publicados</span></div><div class="stat"><b>${pat}</b><span>Para patrocinar</span></div>`;}
+function monthName(d){return d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}
+function render(){stats();document.getElementById('monthLabel').textContent=monthName(current);const titles={dashboard:['Visão geral','Resumo dos conteúdos, próximos posts e prioridades.'],calendar:['Calendário','Organize as postagens por dia e canal.'],kanban:['Kanban','Controle produção por status.'],list:['Lista completa','Edite, filtre e exporte todos os posts.'],feed:['Prévia do Feed','Veja suas artes aplicadas em um mockup de perfil do Instagram antes de publicar.'],strategy:['Rota do lançamento','Método de aquecimento, beta e comercialização.'],settings:['Backup e uso','Como usar localmente e proteger seus dados.']};document.getElementById('viewTitle').textContent=titles[view][0];document.getElementById('viewSub').textContent=titles[view][1];if(view==='dashboard')renderDashboard();if(view==='calendar')renderCalendar();if(view==='kanban')renderKanban();if(view==='list')renderList();if(view==='feed')renderFeed();if(view==='strategy')renderStrategy();if(view==='settings')renderSettings();}
+function pBadges(p){return `${hasAssets(p)?'<span class="hasAssetDot" title="Arte pronta"></span>':''}<span class="badge ${p.platform=='Instagram'?'ig':p.platform=='WhatsApp'?'wa':p.platform=='Facebook'?'fb':'off'}">${p.platform}</span><span class="badge ${p.status=='Ideia'?'stat1':p.status=='Produzindo'?'stat2':p.status=='Agendado'?'stat3':'stat4'}">${p.status}</span>${p.sponsor=='sim'?'<span class="badge spon">PAT</span>':''}`}
+function renderDashboard(){const next=filtered().filter(p=>p.status!='Publicado').slice(0,8);document.getElementById('content').innerHTML=`<div class="help"><h3>Próximas prioridades</h3><p>Use este painel para controlar o pré-lançamento. O foco antes da venda é: autoridade local, histórias reais, cadastros grátis e beta.</p></div><div class="board"><div class="col"><h3>Alta prioridade</h3>${filtered().filter(p=>p.priority=='Alta'||p.priority=='Urgente').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Próximos posts</h3>${next.map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Para patrocinar</h3>${filtered().filter(p=>p.sponsor=='sim').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>WhatsApp</h3>${filtered().filter(p=>p.platform=='WhatsApp').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div></div>`;}
+function card(p){return `<div class="card" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()"><h4>${p.title}</h4><p>${fmtDate(p.date)} às ${p.time||'--'} • ${p.type} • ${p.phase}</p><div>${pBadges(p)}</div><p>${p.hook||''}</p></div>`}
+function renderCalendar(){const year=current.getFullYear(),month=current.getMonth();const first=new Date(year,month,1);const start=new Date(first);start.setDate(start.getDate()-first.getDay());let html='<div class="calendarHead"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div><div class="calendar">';const f=filtered();for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=d.toISOString().slice(0,10);const items=f.filter(p=>p.date==iso);html+=`<div class="day ${d.getMonth()!=month?'out':''}"><div class="daynum">${d.getDate()} ${d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>${items.map(p=>`<button class="postpill" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()"><b>${p.time||''} ${hasAssets(p)?'🖼️ ':''}${p.title}</b><div class="pmeta">${pBadges(p)}</div></button>`).join('')}<button class="postpill" style="background:transparent;border-style:dashed;color:var(--muted)" onclick="openModal('${iso}')">+ Post</button></div>`}html+='</div>';document.getElementById('content').innerHTML=html;}
+function renderKanban(){const statuses=['Ideia','Produzindo','Agendado','Publicado'];document.getElementById('content').innerHTML='<div class="board">'+statuses.map(s=>`<div class="col"><h3>${s}</h3>${filtered().filter(p=>p.status==s).map(card).join('')||'<div class="empty">Sem posts.</div>'}</div>`).join('')+'</div>';}
+function renderList(){const rows=filtered().map(p=>`<tr onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()" style="cursor:pointer"><td>${fmtDate(p.date)}<br><span class="small">${p.time||''}</span></td><td><b>${hasAssets(p)?'🖼️ ':''}${p.title}</b><br><span class="small">${p.hook||''}</span></td><td>${p.platform}<br><span class="small">${p.type}</span></td><td>${p.phase}</td><td>${p.status}</td><td>${p.sponsor=='sim'?'Sim':'Não'}</td><td>${p.cta||''}</td></tr>`).join('');document.getElementById('content').innerHTML=`<div class="tablewrap"><table><thead><tr><th>Data</th><th>Conteúdo</th><th>Canal</th><th>Fase</th><th>Status</th><th>Patrocinar</th><th>CTA</th></tr></thead><tbody>${rows}</tbody></table></div>`;}
+
+function getFeedItems(){
+  return filtered().filter(p=>p.platform==='Instagram').sort((a,b)=>{
+    const ap = Number.isFinite(Number(a.feedPos)) ? Number(a.feedPos) : 9999;
+    const bp = Number.isFinite(Number(b.feedPos)) ? Number(b.feedPos) : 9999;
+    if(ap!==bp) return ap-bp;
+    return (b.date+b.time).localeCompare(a.date+a.time);
+  });
+}
+let dragFeedId = null;
+function getFeedPreviewTab(){return localStorage.getItem('tz_feed_preview_tab')||'feed'}
+function setFeedPreviewTab(tab){localStorage.setItem('tz_feed_preview_tab',tab);renderFeed()}
+function getProfilePreviewItems(tab=getFeedPreviewTab()){
+  const key = tab==='reels' ? 'feedPosReels' : 'feedPosFeed';
+  return filtered().filter(p=>p.platform==='Instagram').filter(p=> tab==='reels' ? p.type==='Reels' : (p.type!=='Reels' && p.type!=='Stories')).sort((a,b)=>{
+    const ap=typeof a[key]==='number'?a[key]:999999, bp=typeof b[key]==='number'?b[key]:999999;
+    if(ap!==bp) return ap-bp;
+    return (b.date+b.time).localeCompare(a.date+a.time);
+  });
+}
+function renderFeed(){
+  const tab=getFeedPreviewTab();
+  const allItems=filtered().filter(p=>p.platform==='Instagram').sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const items=getProfilePreviewItems(tab);
+  const withArt=items.filter(p=>hasAssets(p)).length;
+  const feedCount=allItems.filter(p=>p.type!=='Reels' && p.type!=='Stories').length;
+  const reelsCount=allItems.filter(p=>p.type==='Reels').length;
+  const gridItems=items.slice(0,27).map((p,idx)=>`<button class="feedTile ${hasAssets(p)?'':'emptyTile'}" data-type="${p.type||'post'}" draggable="true" ondragstart="startFeedDrag(event,'${p.id}')" ondragover="overFeedDrag(event,'${p.id}')" ondragleave="leaveFeedDrag(event)" ondrop="dropFeedDrag(event,'${p.id}')" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">${hasAssets(p)?mediaHTML(p):`<span>${escapeHTML(p.title||'Post sem arte')}</span>`}<span class="orderTag">${idx+1}</span></button>`).join('');
+  const mini=items.slice(0,10).map(p=>`<div class="feedMini" onclick="openPostPreview('${p.id}')"><div class="feedMiniMedia ${hasAssets(p)?'':'brandLogoMini'}">${hasAssets(p)?mediaHTML(p):`<img src="${BRAND_LOGO}" alt="TeAcheiZAP">`}</div><div><b>${escapeHTML(p.title||'Sem título')}</b><span>${fmtDate(p.date)} • ${p.type} • ${p.status}</span></div></div>`).join('');
+  const currentTitle = tab==='reels' ? 'Seus reels no valendo' : 'Seu feed no valendo';
+  const nextTitle = tab==='reels' ? 'Próximos reels' : 'Próximos no feed';
+  const visibleLabel = tab==='reels' ? 'Reels' : 'Posts do feed';
+  const emptyLabel = tab==='reels' ? 'Ainda não há reels do Instagram no filtro.' : 'Ainda não há posts do feed no filtro.';
+  document.getElementById('content').innerHTML=`<div class="feedShell"><div class="phoneFrame"><div class="profileMock"><div class="profileTop"><span>← teacheizap</span><span>☰</span></div><div class="profileHeader"><div class="profileLogo"><img src="${BRAND_LOGO}" alt="TeAcheiZAP"></div><div class="profileStats"><div><b>${allItems.length}</b><br><span>posts</span></div><div><b>0</b><br><span>seguidores</span></div><div><b>0</b><br><span>seguindo</span></div></div></div><div class="profileBio"><b>TeAcheiZAP</b><br>Sua lista telefônica no WhatsApp!<br>Precisou de um contato? Dá um zap.<br><span style="color:#287a3f">www.teacheizap.com.br</span></div><div class="profileTabs"><button class="profileTab ${tab==='feed'?'active':''}" onclick="setFeedPreviewTab('feed')">▦<span>Feed • ${feedCount}</span></button><button class="profileTab ${tab==='reels'?'active':''}" onclick="setFeedPreviewTab('reels')">▶<span>Reels • ${reelsCount}</span></button><button class="profileTab disabled" type="button">☻<span>Marcados</span></button></div><div class="feedGrid">${gridItems||`<div class="empty" style="grid-column:1/-1;color:#555;padding:28px 18px">${emptyLabel}</div>`}</div></div></div><div class="feedSide"><div class="feedPanel"><h3>${currentTitle}</h3><p>Agora você pode clicar nas abas do mockup, como no Instagram, para alternar entre <b>Feed</b> e <b>Reels</b>.</p><p class="reorderHint"><b>Reposicionar criativos:</b> arraste qualquer quadrado ${tab==='reels'?'dos reels':'do feed'} e solte na posição que quiser. A ordem fica salva automaticamente.</p><div class="gridstats" style="grid-template-columns:repeat(2,1fr);margin:14px 0"><div class="stat"><b>${items.length}</b><span>${visibleLabel}</span></div><div class="stat"><b>${withArt}</b><span>Com arte pronta</span></div></div><button class="btn primary" onclick="openModal()">+ Criar novo post</button><button class="btn" style="margin-left:8px" onclick="resetFeedOrder()">Resetar ordem</button></div><div class="feedPanel"><h3>${nextTitle}</h3><div class="feedMiniList">${mini||'<div class="empty">Sem posts nesta aba.</div>'}</div></div></div></div>`;
+}
+function startFeedDrag(e,id){dragFeedId=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move'}
+function overFeedDrag(e,id){e.preventDefault();if(e.currentTarget)e.currentTarget.classList.add('dropTarget')}
+function leaveFeedDrag(e){if(e.currentTarget)e.currentTarget.classList.remove('dropTarget')}
+function dropFeedDrag(e,targetId){e.preventDefault();document.querySelectorAll('.feedTile').forEach(el=>el.classList.remove('dragging','dropTarget'));if(!dragFeedId||dragFeedId===targetId)return;const tab=getFeedPreviewTab();const key=tab==='reels'?'feedPosReels':'feedPosFeed';const items=getProfilePreviewItems(tab).slice();const from=items.findIndex(p=>p.id===dragFeedId);const to=items.findIndex(p=>p.id===targetId);if(from<0||to<0)return;const moved=items.splice(from,1)[0];items.splice(to,0,moved);items.forEach((p,i)=>{const original=posts.find(x=>x.id===p.id);if(original)original[key]=i});save();dragFeedId=null;renderFeed()}
+function resetFeedOrder(){posts.forEach(p=>{delete p.feedPos; delete p.feedPosFeed; delete p.feedPosReels});save();renderFeed()}
+function escapeHTML(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function postInstagramHTML(p){const cap=escapeHTML((p.copy||p.hook||'Legenda do post aparece aqui.')).slice(0,900);return `<div class="igTop"><div class="igAvatar"><img src="${BRAND_LOGO}" alt="TeAcheiZAP"></div><div><div class="igName">teacheizap</div><div class="igLoc">Leme, SP • ${escapeHTML(p.platform||'Instagram')}</div></div></div><div class="igMedia">${mediaHTML(p)}</div><div class="igActions">♡ 💬 ✈︎ <span style="margin-left:auto">▢</span></div><div class="igCaption"><b>teacheizap</b> ${cap}${cap.length>=900?' <span class="igMore">... mais</span>':''}<br><span class="igMore">${escapeHTML(p.cta||'TeAcheiZAP, sua lista telefônica no WhatsApp!')}</span></div>`}
+function openPostPreview(id){const p=posts.find(x=>x.id==id);if(!p)return;hideHover();document.getElementById('postPreviewScreen').innerHTML=`<div class="previewTopbar"><div><h2>Prévia do post no Instagram</h2><div class="small">Visualização em tela inteira com a arte aplicada no mockup.</div></div><button class="close" onclick="closePostPreview()">×</button></div><div class="previewFullGrid"><div class="fullMockPhone"><div class="igPost">${postInstagramHTML(p)}</div></div><div class="previewInfo"><h3>${escapeHTML(p.title||'Post sem título')}</h3><div class="pmeta">${pBadges(p)}</div><p><b>Data:</b> ${fmtDate(p.date)} às ${p.time||'--'}<br><b>Formato:</b> ${escapeHTML(p.type)} • <b>Fase:</b> ${escapeHTML(p.phase)}</p><div class="bigcopy"><b>Gancho:</b> ${escapeHTML(p.hook||'')}\n\n<b>Legenda/mensagem:</b> ${escapeHTML(p.copy||'')}\n\n<b>CTA:</b> ${escapeHTML(p.cta||'')}</div><div class="bigcopy"><b>Roteiro visual:</b>\n${escapeHTML(p.visual||'')}</div><div class="previewBtns"><button class="btn primary" onclick="editFromPreview('${p.id}')">Editar conteúdo / trocar arte</button><button class="btn" onclick="closePostPreview();setView('feed')">Ver feed inteiro</button><button class="btn" onclick="closePostPreview()">Fechar</button></div></div></div>`;document.getElementById('postPreviewScreen').classList.add('show')}
+function closePostPreview(){document.getElementById('postPreviewScreen').classList.remove('show')}
+function editFromPreview(id){closePostPreview();editPost(id)}
+
+function renderStrategy(){document.getElementById('content').innerHTML=`<div class="help"><h3>Método TeAcheiZAP</h3><p>Antes de vender, gere confiança. Antes de pedir assinatura, prove que a cidade precisa. Antes do lançamento comercial, faça beta gratuito.</p></div><div class="phase"><b>Fase 1 — Autoridade local</b><p>Use histórias reais: “você conhece alguém que trabalha bem?”. Objetivo: fazer a cidade se reconhecer no problema.</p></div><div class="phase"><b>Fase 2 — Curiosidade e engajamento</b><p>Enquetes, perguntas, rua, grupos e Facebook. Objetivo: descobrir categorias mais buscadas e gerar comentários.</p></div><div class="phase"><b>Fase 3 — Cadastro grátis</b><p>200 profissionais grátis e 50 comércios parceiros grátis. Objetivo: preencher a base antes de vender.</p></div><div class="phase"><b>Fase 4 — Beta</b><p>Abertura sugerida: 03/08/2026. Testar buscas, respostas, categorias e confiança.</p></div><div class="phase"><b>Fase 5 — Lançamento comercial</b><p>Abertura sugerida: 24/08/2026. Oferecer planos fundadores para quem quiser continuar aparecendo.</p></div>`;}
+function renderSettings(){document.getElementById('content').innerHTML=`<div class="help"><h3>Como usar localmente</h3><p>1. Abra o arquivo <span class="kbd">index.html</span> no navegador.<br>2. Cadastre e edite posts normalmente.<br>3. Faça backup semanal em JSON.<br>4. Para levar para outro computador, importe o arquivo JSON.</p></div><div class="phase"><b>Backup</b><p>Use “Backup JSON” para salvar todos os posts. O arquivo CSV serve para abrir no Excel/Google Sheets.</p><input type="file" id="importFile" accept=".json" onchange="importJSON(event)"></div><div class="phase"><b>Resetar sistema</b><p>Use apenas se quiser voltar para o calendário inicial.</p><button class="btn" onclick="resetSeed()">Restaurar calendário inicial</button></div>`;}
+function fmtDate(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR')}
+function prevMonth(){current.setMonth(current.getMonth()-1);render()}function nextMonth(){current.setMonth(current.getMonth()+1);render()}
+function openModal(date){document.getElementById('modalTitle').textContent='Novo post';['postId','title','hook','copy','visual','cta','owner','notes','assetData','assetType','assetFileName','assetItems'].forEach(id=>document.getElementById(id).value='');document.getElementById('assetFile').value='';setAssetThumb('', '', 'Nenhuma arte enviada ainda.', '');document.getElementById('date').value=date||new Date().toISOString().slice(0,10);document.getElementById('time').value='09:00';document.getElementById('platform').value='Instagram';document.getElementById('type').value='Reels';document.getElementById('phase').value='Autoridade';document.getElementById('status').value='Ideia';document.getElementById('sponsor').value='nao';document.getElementById('priority').value='Normal';document.getElementById('modalBackdrop').classList.add('show');updatePostPreview()}
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+function editPost(id){const p=posts.find(x=>x.id==id);if(!p)return;document.getElementById('modalTitle').textContent='Editar post';['postId','date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems'].forEach(k=>document.getElementById(k).value=p[k]||'');document.getElementById('postId').value=p.id;document.getElementById('assetFile').value='';setAssetThumb(p.assetData,p.assetType,p.assetFileName,p.assetItems||'');document.getElementById('modalBackdrop').classList.add('show');updatePostPreview()}
+function savePost(){const p={};['date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems'].forEach(k=>p[k]=document.getElementById(k).value);const existingId=document.getElementById('postId').value;if(existingId){const old=posts.find(x=>x.id==existingId);if(old){['feedPos','feedPosFeed','feedPosReels'].forEach(k=>{if(old[k]!==undefined)p[k]=old[k]})}}const id=document.getElementById('postId').value;if(id){const i=posts.findIndex(x=>x.id==id);posts[i]={...posts[i],...p}}else{p.id='p'+Date.now();posts.push(p)}save();closeModal();render()}
+function duplicatePost(){const id=document.getElementById('postId').value;if(!id){savePost();return}const p=posts.find(x=>x.id==id);const n={...p,id:'p'+Date.now(),title:p.title+' (cópia)',status:'Ideia'};posts.push(n);save();closeModal();render()}
+function deletePost(){const id=document.getElementById('postId').value;if(!id){closeModal();return}if(confirm('Excluir este post?')){posts=posts.filter(p=>p.id!=id);save();closeModal();render()}}
+
+function parseAssetItems(p){
+  if(p&&p.assetItems){try{const arr=JSON.parse(p.assetItems);if(Array.isArray(arr)&&arr.length)return arr}catch(e){}}
+  if(p&&p.assetData)return [{data:p.assetData,type:p.assetType||'image/png',name:p.assetFileName||'Arte'}];
+  return [];
+}
+function hasAssets(p){return parseAssetItems(p).length>0}
+function setAssetThumb(data,type,name,itemsJson=''){
+  const img=document.getElementById('assetThumb');
+  const label=document.getElementById('assetName');
+  let items=[];
+  if(itemsJson){try{items=JSON.parse(itemsJson)||[]}catch(e){items=[]}}
+  if(!items.length && data)items=[{data,type,name}];
+  if(items.length && items[0].type && items[0].type.startsWith('image/')){img.src=items[0].data;img.classList.add('show')}else{img.src='';img.classList.remove('show')}
+  const extra=items.length>1?` • ${items.length} slides carregados`:'';
+  label.innerHTML=items.length?`Arte carregada: ${escapeHTML(items[0].name||name||'arquivo')}${extra}<span class="carouselHelp">Para adicionar mais slides, clique em “Adicionar mais slides” e escolha outros arquivos. Eles entram no mesmo carrossel.</span>`:'Nenhuma arte enviada ainda.';
+  let row=document.getElementById('assetThumbs');
+  if(!row){row=document.createElement('div');row.id='assetThumbs';row.className='assetThumbs';document.querySelector('.assetRow')?.appendChild(row)}
+  row.innerHTML=items.map((it,i)=>`<div class="assetThumbMini" title="${escapeHTML(it.name||('Slide '+(i+1)))}">${it.type&&it.type.startsWith('video/')?`<video src="${it.data}" muted playsinline></video>`:`<img src="${it.data}" alt="Slide ${i+1}">`}<button type="button" class="assetThumbRemove" onclick="removeAssetSlide(${i})" title="Remover slide">×</button></div>`).join('');
+}
+function handleAssetUpload(e){
+  const incoming=Array.from(e.target.files||[]);
+  if(!incoming.length)return;
+  let current=[];
+  try{current=JSON.parse(document.getElementById('assetItems').value||'[]')||[]}catch(err){current=[]}
+  const files=incoming;
+  if(current.length+files.length>10){alert('Para manter o sistema leve, use no máximo 10 slides por carrossel.');e.target.value='';return}
+  const existingSize=current.reduce((s,it)=>s+(it.data?it.data.length:0),0);
+  const total=files.reduce((s,f)=>s+f.size,0);
+  if(existingSize+total>18*1024*1024){alert('Os arquivos juntos estão pesados para salvar localmente. Comprima em JPG/WEBP ou reduza para até 18 MB no total.');e.target.value='';return}
+  const tooBig=files.find(f=>f.size>4.5*1024*1024);
+  if(tooBig){alert('Cada arquivo precisa ter até 4,5 MB. Comprima: '+tooBig.name);e.target.value='';return}
+  Promise.all(files.map(file=>new Promise(resolve=>{const r=new FileReader();r.onload=()=>resolve({data:r.result,type:file.type,name:file.name});r.readAsDataURL(file)}))).then(newItems=>{
+    const items=current.concat(newItems);
+    document.getElementById('assetItems').value=JSON.stringify(items);
+    document.getElementById('assetData').value=items[0]?.data||'';
+    document.getElementById('assetType').value=items[0]?.type||'';
+    document.getElementById('assetFileName').value=items.map(x=>x.name).join(', ');
+    setAssetThumb(items[0]?.data||'',items[0]?.type||'',items[0]?.name||'',JSON.stringify(items));
+    updatePostPreview();
+    e.target.value='';
+  });
+}
+function removeAssetSlide(index){
+  let items=[];
+  try{items=JSON.parse(document.getElementById('assetItems').value||'[]')||[]}catch(err){items=[]}
+  items.splice(index,1);
+  document.getElementById('assetItems').value=JSON.stringify(items);
+  document.getElementById('assetData').value=items[0]?.data||'';
+  document.getElementById('assetType').value=items[0]?.type||'';
+  document.getElementById('assetFileName').value=items.map(x=>x.name).join(', ');
+  setAssetThumb(items[0]?.data||'',items[0]?.type||'',items[0]?.name||'',JSON.stringify(items));
+  updatePostPreview();
+}
+function removeAsset(){document.getElementById('assetData').value='';document.getElementById('assetType').value='';document.getElementById('assetFileName').value='';document.getElementById('assetItems').value='';document.getElementById('assetFile').value='';setAssetThumb('', '', 'Nenhuma arte enviada ainda.', '');updatePostPreview()}
+function currentFormPost(){const p={};['date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems'].forEach(k=>p[k]=document.getElementById(k)?.value||'');return p}
+function mediaTag(it,idx){return it.type&&it.type.startsWith('video/')?`<video src="${it.data}" controls muted playsinline></video>`:`<img src="${it.data}" alt="Arte ${idx+1}">`}
+function carouselHTML(items){return `<div class="carouselMock" data-index="0">${items.map((it,i)=>`<div class="carouselSlide ${i===0?'active':''}">${mediaTag(it,i)}</div>`).join('')}${items.length>1?`<button type="button" class="carouselNav prev" onclick="carouselMove(this,-1,event)">‹</button><button type="button" class="carouselNav next" onclick="carouselMove(this,1,event)">›</button><div class="carouselCount">1/${items.length}</div><div class="carouselDots">${items.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>`:''}</div>`}
+function carouselMove(btn,dir,event){if(event){event.preventDefault();event.stopPropagation()}const box=btn.closest('.carouselMock');if(!box)return;const slides=[...box.querySelectorAll('.carouselSlide')];if(!slides.length)return;let idx=parseInt(box.dataset.index||'0',10);idx=(idx+dir+slides.length)%slides.length;box.dataset.index=idx;slides.forEach((s,i)=>s.classList.toggle('active',i===idx));box.querySelectorAll('.carouselDots span').forEach((d,i)=>d.classList.toggle('active',i===idx));const c=box.querySelector('.carouselCount');if(c)c.textContent=(idx+1)+'/'+slides.length}
+function mediaHTML(p){const items=parseAssetItems(p);if(items.length)return carouselHTML(items);return `<div class="placeholder">Prévia da arte<br><span style="font-size:12px;color:#789">Suba uma imagem para simular o feed</span></div>`}
+function updatePostPreview(){const el=document.getElementById('igPreview');if(el)el.innerHTML=postInstagramHTML(currentFormPost())}
+function showHover(e,id){const p=posts.find(x=>x.id==id);const h=document.getElementById('hoverPreview');if(!p||!hasAssets(p)){hideHover();return}h.innerHTML=`${mediaHTML(p)}<div class="hpText"><b>${escapeHTML(p.title)}</b><br>${escapeHTML(p.platform)} • ${escapeHTML(p.type)}</div>`;h.classList.add('show');moveHover(e)}
+function moveHover(e){const h=document.getElementById('hoverPreview');if(!h.classList.contains('show'))return;let x=e.clientX+18,y=e.clientY+18;if(x+320>window.innerWidth)x=e.clientX-320;if(y+380>window.innerHeight)y=e.clientY-380;h.style.left=Math.max(10,x)+'px';h.style.top=Math.max(10,y)+'px'}
+function hideHover(){document.getElementById('hoverPreview').classList.remove('show')}
+
+function applyTheme(){const theme=localStorage.getItem('tz_theme')||'dark';document.body.classList.toggle('light',theme==='light');const btn=document.getElementById('themeBtn');if(btn)btn.textContent=theme==='light'?'🌙 Versão Dark':'☀️ Versão Light'}
+function toggleTheme(){const next=document.body.classList.contains('light')?'dark':'light';localStorage.setItem('tz_theme',next);applyTheme()}
+
+function exportJSON(){const blob=new Blob([JSON.stringify(posts,null,2)],{type:'application/json'});download(blob,'teacheizap_posts_backup.json')}
+function exportCSV(){const keys=['date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','feedPos'];const csv=[keys.join(';')].concat(posts.map(p=>keys.map(k=>'"'+String(p[k]||'').replaceAll('"','""')+'"').join(';'))).join('\n');download(new Blob([csv],{type:'text/csv;charset=utf-8'}),'teacheizap_posts.csv')}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function importJSON(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(Array.isArray(data)){posts=data;save();render();alert('Backup importado.')}}catch(err){alert('Arquivo inválido.')}};r.readAsText(file)}
+function resetSeed(){if(confirm('Restaurar calendário inicial? Isso apaga as edições locais.')){posts=seedPosts.map((p,i)=>({...p,id:'p'+(Date.now()+i)}));save();render()}}
+['title','hook','copy','cta','platform'].forEach(id=>document.getElementById(id)?.addEventListener('input',updatePostPreview));document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closePostPreview();}});applyTheme();render();
+</script>
+</body>
+</html>
