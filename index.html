@@ -802,7 +802,40 @@ function save(){
   localStorage.setItem('tz_posts',JSON.stringify(posts));
   saveToSupabase();
 }
-function filtered(){const q=document.getElementById('q')?.value?.toLowerCase()||'';const fp=document.getElementById('fPlatform')?.value||'';const fs=document.getElementById('fStatus')?.value||'';const fph=document.getElementById('fPhase')?.value||'';const fsp=document.getElementById('fSponsor')?.value||'';const ft=document.getElementById('fType')?.value||'';return posts.filter(p=>(!q||JSON.stringify(p).toLowerCase().includes(q))&&(!fp||p.platform==fp)&&(!fs||p.status==fs)&&(!fph||p.phase==fph)&&(!fsp||p.sponsor==fsp)&&(!ft||p.type==ft)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));}
+function filtered(){const q=document.getElementById('q')?.value?.toLowerCase()||'';const fp=document.getElementById('fPlatform')?.value||'';const fs=document.getElementById('fStatus')?.value||'';const fph=document.getElementById('fPhase')?.value||'';const fsp=document.getElementById('fSponsor')?.value||'';const ft=document.getElementById('fType')?.value||'';return posts.filter(p=>p.id!=='strategy_data'&&(!q||JSON.stringify(p).toLowerCase().includes(q))&&(!fp||p.platform==fp)&&(!fs||p.status==fs)&&(!fph||p.phase==fph)&&(!fsp||p.sponsor==fsp)&&(!ft||p.type==ft)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));}
+
+function getStrategy() {
+  const found = posts.find(p => p.id === 'strategy_data');
+  if (found && found.items && found.items.methodTitle) {
+    return found.items;
+  }
+  return {
+    methodTitle: 'Método TeAcheiZAP',
+    methodDesc: 'Antes de vender, gere confiança. Antes de pedir assinatura, prove que a cidade precisa. Antes do lançamento comercial, faça beta gratuito.',
+    phases: [
+      { title: 'Fase 1 — Autoridade local', desc: 'Use histórias reais: “você conhece alguém que trabalha bem?”. Objetivo: fazer a cidade se reconhecer no problema.' },
+      { title: 'Fase 2 — Curiosidade e engajamento', desc: 'Enquetes, perguntas, rua, grupos e Facebook. Objetivo: descobrir categorias mais buscadas e gerar comentários.' },
+      { title: 'Fase 3 — Cadastro grátis', desc: '200 profissionais grátis e 50 comércios parceiros grátis. Objetivo: preencher a base antes de vender.' },
+      { title: 'Fase 4 — Beta', desc: 'Abertura sugerida: 03/08/2026. Testar buscas, respostas, categorias e confiança.' },
+      { title: 'Fase 5 — Lançamento comercial', desc: 'Abertura sugerida: 24/08/2026. Oferecer planos fundadores para quem quiser continuar aparecendo.' }
+    ]
+  };
+}
+
+function saveStrategy(strategyData) {
+  let idx = posts.findIndex(p => p.id === 'strategy_data');
+  const postObj = {
+    id: 'strategy_data',
+    title: 'Configurações de Rota do Lançamento',
+    items: strategyData
+  };
+  if (idx >= 0) {
+    posts[idx] = postObj;
+  } else {
+    posts.push(postObj);
+  }
+  save();
+}
 function setView(v){view=v;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==v));applyTheme();render();}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 function stats(){const f=filtered();const total=f.length;const ag=f.filter(p=>p.status=='Agendado').length;const pub=f.filter(p=>p.status=='Publicado').length;const pat=f.filter(p=>p.sponsor=='sim').length;const ig=f.filter(p=>p.platform=='Instagram').length;document.getElementById('stats').innerHTML=`<div class="stat"><b>${total}</b><span>Posts no filtro</span></div><div class="stat"><b>${ig}</b><span>Instagram</span></div><div class="stat"><b>${ag}</b><span>Agendados</span></div><div class="stat"><b>${pub}</b><span>Publicados</span></div><div class="stat"><b>${pat}</b><span>Para patrocinar</span></div>`;}
@@ -877,7 +910,83 @@ function openPostPreview(id){
 function closePostPreview(){document.getElementById('postPreviewScreen').classList.remove('show')}
 function editFromPreview(id){closePostPreview();editPost(id)}
 
-function renderStrategy(){document.getElementById('content').innerHTML=`<div class="help"><h3>Método TeAcheiZAP</h3><p>Antes de vender, gere confiança. Antes de pedir assinatura, prove que a cidade precisa. Antes do lançamento comercial, faça beta gratuito.</p></div><div class="phase"><b>Fase 1 — Autoridade local</b><p>Use histórias reais: “você conhece alguém que trabalha bem?”. Objetivo: fazer a cidade se reconhecer no problema.</p></div><div class="phase"><b>Fase 2 — Curiosidade e engajamento</b><p>Enquetes, perguntas, rua, grupos e Facebook. Objetivo: descobrir categorias mais buscadas e gerar comentários.</p></div><div class="phase"><b>Fase 3 — Cadastro grátis</b><p>200 profissionais grátis e 50 comércios parceiros grátis. Objetivo: preencher a base antes de vender.</p></div><div class="phase"><b>Fase 4 — Beta</b><p>Abertura sugerida: 03/08/2026. Testar buscas, respostas, categorias e confiança.</p></div><div class="phase"><b>Fase 5 — Lançamento comercial</b><p>Abertura sugerida: 24/08/2026. Oferecer planos fundadores para quem quiser continuar aparecendo.</p></div>`;}
+let isEditingStrategy = false;
+
+function renderStrategy(){
+  const s = getStrategy();
+  if (!isEditingStrategy) {
+    const phasesHTML = s.phases.map((ph, idx) => `
+      <div class="phase">
+        <b>${escapeHTML(ph.title)}</b>
+        <p>${escapeHTML(ph.desc)}</p>
+      </div>
+    `).join('');
+    
+    document.getElementById('content').innerHTML = `
+      <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+        <button class="btn primary" onclick="toggleEditStrategy(true)">Editar Rota do Lançamento</button>
+      </div>
+      <div class="help">
+        <h3>${escapeHTML(s.methodTitle)}</h3>
+        <p>${escapeHTML(s.methodDesc)}</p>
+      </div>
+      ${phasesHTML}
+    `;
+  } else {
+    const phasesEditHTML = s.phases.map((ph, idx) => `
+      <div class="phase" style="border-left: 6px solid var(--brand); padding: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.02);">
+        <div style="margin-bottom: 8px;">
+          <label style="font-size: 11px; margin-bottom: 4px; text-transform: uppercase; color: var(--muted);">Título da Fase ${idx + 1}</label>
+          <input type="text" id="editPhaseTitle_${idx}" value="${escapeHTML(ph.title)}" style="font-weight: bold; font-size: 15px; margin-bottom: 0;">
+        </div>
+        <div>
+          <label style="font-size: 11px; margin-bottom: 4px; text-transform: uppercase; color: var(--muted);">Descrição / Instrução da Fase ${idx + 1}</label>
+          <textarea id="editPhaseDesc_${idx}" style="min-height: 60px; font-size: 14px; margin-bottom: 0;">${escapeHTML(ph.desc)}</textarea>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('content').innerHTML = `
+      <div style="margin-bottom: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn" onclick="toggleEditStrategy(false)">Cancelar</button>
+        <button class="btn primary" onclick="saveStrategyData()">Salvar Alterações</button>
+      </div>
+      <div class="help" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; margin-bottom: 20px;">
+        <div>
+          <label style="color: var(--brand); font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Título do Método</label>
+          <input type="text" id="editMethodTitle" value="${escapeHTML(s.methodTitle)}" style="font-size: 18px; font-weight: bold; border-color: rgba(0,230,118,0.2); margin-bottom: 0;">
+        </div>
+        <div>
+          <label style="color: var(--brand); font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Descrição do Método</label>
+          <textarea id="editMethodDesc" style="min-height: 80px; font-size: 14px; margin-bottom: 0;">${escapeHTML(s.methodDesc)}</textarea>
+        </div>
+      </div>
+      ${phasesEditHTML}
+    `;
+  }
+}
+
+function toggleEditStrategy(val) {
+  isEditingStrategy = val;
+  renderStrategy();
+}
+
+function saveStrategyData() {
+  const s = {
+    methodTitle: document.getElementById('editMethodTitle').value,
+    methodDesc: document.getElementById('editMethodDesc').value,
+    phases: []
+  };
+  for (let i = 0; i < 5; i++) {
+    s.phases.push({
+      title: document.getElementById(`editPhaseTitle_${i}`).value,
+      desc: document.getElementById(`editPhaseDesc_${i}`).value
+    });
+  }
+  saveStrategy(s);
+  isEditingStrategy = false;
+  renderStrategy();
+}
 function renderSettings(){
   document.getElementById('content').innerHTML=`
     <div class="help">
