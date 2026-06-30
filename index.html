@@ -1138,6 +1138,86 @@ function getOverduePosts() {
   return posts.filter(p => p.id !== 'strategy_data' && p.date && p.date < todayISO && p.status !== 'Publicado');
 }
 
+function getTimeColor(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string') return 200; // default blue/teal
+  const parts = timeStr.split(':');
+  const hour = parseInt(parts[0], 10) || 0;
+  const minute = parseInt(parts[1], 10) || 0;
+  const m = hour * 60 + minute; // minutes since midnight
+
+  // Anchors based on user preferences:
+  // - 09:00 (540m) -> Verde Claro (Hue 120)
+  // - 11:00 (660m) -> Azul Claro (Hue 200)
+  // - 14:00 (840m) -> Roxo Claro (Hue 275)
+  // - 18:00 (1080m) -> Amarelo Claro (Hue 55)
+
+  let hue;
+  if (m >= 540 && m < 660) {
+    // 9:00 to 11:00
+    const pct = (m - 540) / 120;
+    hue = 120 + (200 - 120) * pct;
+  } else if (m >= 660 && m < 840) {
+    // 11:00 to 14:00
+    const pct = (m - 660) / 180;
+    hue = 200 + (275 - 200) * pct;
+  } else if (m >= 840 && m < 1080) {
+    // 14:00 to 18:00
+    const pct = (m - 840) / 240;
+    // Go from 275 to 55 (using 360 + 55 = 415)
+    hue = 275 + (415 - 275) * pct;
+  } else {
+    // 18:00 to 9:00 next day
+    // Go from 18:00 (1080m) to 9:00 (1440 + 540 = 1980m)
+    // Hue goes from 55 to 120
+    let currentM = m;
+    if (m < 540) {
+      currentM += 1440; // wrap around midnight
+    }
+    const pct = (currentM - 1080) / (1980 - 1080);
+    hue = 55 + (120 - 55) * pct;
+  }
+
+  return Math.round(hue) % 360;
+}
+
+function getPostPillStyle(p) {
+  const hue = getTimeColor(p.time);
+  const isLate = isPostOverdue(p);
+  const isLight = document.body.classList.contains('light');
+  
+  let styles = `border-left: 4px solid hsl(${hue}, 85%, ${isLight ? 42 : 50}%) !important;`;
+  
+  if (isLate) {
+    styles += isLight 
+      ? 'border-color: rgba(255, 60, 98, 0.45) !important; background: linear-gradient(135deg, rgba(255, 60, 98, 0.08), #ffffff) !important; outline: 1px solid rgba(255, 60, 98, 0.3);' 
+      : 'border-color: rgba(255, 60, 98, 0.45) !important; background: linear-gradient(135deg, rgba(255, 60, 98, 0.16), rgba(255, 255, 255, 0.02)) !important; outline: 1px solid rgba(255, 60, 98, 0.3);';
+  } else {
+    styles += isLight
+      ? `background: linear-gradient(135deg, hsla(${hue}, 85%, 92%, 0.95), hsla(${hue}, 80%, 96%, 0.95)) !important; border-color: hsla(${hue}, 45%, 82%, 0.8) !important;`
+      : `background: linear-gradient(135deg, hsla(${hue}, 50%, 12%, 0.8), hsla(${hue}, 25%, 7%, 0.9)) !important; border-color: hsla(${hue}, 30%, 25%, 0.5) !important;`;
+  }
+  return styles;
+}
+
+function getCardStyle(p) {
+  const hue = getTimeColor(p.time);
+  const isLate = isPostOverdue(p);
+  const isLight = document.body.classList.contains('light');
+  
+  let styles = `border-left: 4px solid hsl(${hue}, 85%, ${isLight ? 42 : 50}%) !important;`;
+  
+  if (isLate) {
+    styles += isLight 
+      ? 'border-color: rgba(255, 60, 98, 0.45) !important; background: linear-gradient(135deg, rgba(255, 60, 98, 0.08), #ffffff) !important; outline: 1px solid rgba(255, 60, 98, 0.3);' 
+      : 'border-color: rgba(255, 60, 98, 0.45) !important; background: linear-gradient(135deg, rgba(255, 60, 98, 0.16), rgba(255, 255, 255, 0.02)) !important; outline: 1px solid rgba(255, 60, 98, 0.3);';
+  } else {
+    styles += isLight
+      ? `background: linear-gradient(135deg, hsla(${hue}, 85%, 92%, 0.95), hsla(${hue}, 80%, 96%, 0.95)) !important; border-color: hsla(${hue}, 45%, 82%, 0.8) !important;`
+      : `background: linear-gradient(160deg, hsla(${hue}, 45%, 11%, 0.9) 0%, hsla(${hue}, 20%, 6%, 0.95) 100%) !important; border-color: hsla(${hue}, 30%, 20%, 0.5) !important;`;
+  }
+  return styles;
+}
+
 let dragCalendarPostId = null;
 
 function startCalendarDrag(e, id) {
@@ -1207,7 +1287,8 @@ function renderDashboard(){
 }
 function card(p){
   const hookHTML = p.hook ? `<p class="card-hook"><b>Gancho:</b> ${escapeHTML(p.hook)}</p>` : '';
-  return `<div class="card" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">
+  const cardStyle = getCardStyle(p);
+  return `<div class="card" style="${cardStyle}" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">
     <div class="card-header">
       <span class="card-time">🕒 ${p.time || '--:--'}</span>
       <span class="card-date">${fmtDate(p.date)}</span>
@@ -1233,8 +1314,7 @@ function renderCalendar(){
     html+=`<div class="day ${d.getMonth()!=month?'out':''}" ondragover="allowCalendarDrop(event)" ondragleave="leaveCalendarDay(event)" ondrop="dropCalendarPost(event, '${iso}')">
       <div class="daynum">${d.getDate()} ${d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>
       ${items.map(p=> {
-        const isLate = isPostOverdue(p);
-        const pillStyle = isLate ? 'border-color: rgba(255, 60, 98, 0.45); background: linear-gradient(135deg, rgba(255, 60, 98, 0.16), rgba(255, 255, 255, 0.02));' : '';
+        const pillStyle = getPostPillStyle(p);
         return `<button class="postpill" style="${pillStyle}" draggable="true" ondragstart="startCalendarDrag(event, '${p.id}')" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">
           <div class="pill-header">
             <span class="pill-time">🕒 ${p.time || '--:--'}</span>
