@@ -149,11 +149,129 @@
     .daynum{font-weight:1000;color:var(--muted);font-size:13px;margin-bottom:8px;display:flex;justify-content:space-between;text-transform:capitalize}
     .postpill{
       display:block;width:100%;text-align:left;border:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,rgba(0,230,118,.13),rgba(255,255,255,.035));
-      color:var(--text);border-radius:14px;padding:8px 9px;margin:6px 0;cursor:pointer;font-size:12px;transition:.15s ease;box-shadow:0 8px 18px rgba(0,0,0,.10)
+      color:var(--text);border-radius:18px;padding:10px 12px;margin:6px 0;cursor:pointer;font-size:12px;transition:.15s ease;box-shadow:0 8px 18px rgba(0,0,0,.10)
     }
     .postpill:hover{background:linear-gradient(135deg,rgba(0,230,118,.22),rgba(255,255,255,.05));transform:translateX(2px)}
-    .pmeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:1000;border:1px solid rgba(255,255,255,.16);color:#06100d;background:var(--brand);letter-spacing:.02em}
-    .badge.ig{background:linear-gradient(135deg,#ff9bd5,#ff66b8)}.badge.wa{background:linear-gradient(135deg,#74ffa4,#00e676)}.badge.fb{background:linear-gradient(135deg,#9ec3ff,#6ca3ff)}.badge.off{background:linear-gradient(135deg,#ffe08a,#ffd166)}.badge.stat1{background:#bbd0c2}.badge.stat2{background:#78a6ff}.badge.stat3{background:#ffd166}.badge.stat4{background:#00e676}.badge.spon{background:linear-gradient(135deg,#ff7790,#ff3c62);color:#fff}
+    
+    .pill-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .pill-time {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: var(--soft);
+    }
+    body.light .pill-time {
+      background: rgba(0, 0, 0, 0.04);
+      color: #102016;
+    }
+    .pill-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+    body.light .pill-title {
+      color: #102016;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .card-time {
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--brand);
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 230, 118, 0.15);
+    }
+    body.light .card-time {
+      background: rgba(0, 200, 83, 0.06);
+      color: #008f39;
+      border-color: rgba(0, 200, 83, 0.12);
+    }
+    .card-date {
+      color: var(--muted);
+    }
+    .card-title {
+      margin: 0 0 6px 0 !important;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: 1.35;
+      color: var(--text);
+    }
+    body.light .card-title {
+      color: #102016;
+    }
+    .card-subtitle {
+      color: var(--muted) !important;
+      font-size: 12px !important;
+      margin: 0 0 8px 0 !important;
+    }
+    .card-hook {
+      font-size: 12px !important;
+      color: var(--soft) !important;
+      margin: 8px 0 0 0 !important;
+      padding-top: 8px;
+      border-top: 1px solid var(--line2);
+      opacity: 0.95;
+    }
+    body.light .card-hook {
+      color: #333 !important;
+      border-top-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .pmeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      border-radius:8px;
+      padding:3px 7px;
+      font-size:10px;
+      font-weight:800;
+      border:1px solid transparent;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      transition: background 0.15s ease;
+    }
+    .badge.ig{background:rgba(255,102,184,0.1);color:#ff66b8;border-color:rgba(255,102,184,0.25)}
+    .badge.wa{background:rgba(0,230,118,0.1);color:#00e676;border-color:rgba(0,230,118,0.25)}
+    .badge.fb{background:rgba(108,163,255,0.1);color:#6ca3ff;border-color:rgba(108,163,255,0.25)}
+    .badge.off{background:rgba(255,209,102,0.1);color:#ffd166;border-color:rgba(255,209,102,0.25)}
+    .badge.stat1{background:rgba(255,255,255,0.06);color:var(--muted);border-color:rgba(255,255,255,0.12)}
+    .badge.stat2{background:rgba(120,166,255,0.1);color:#78a6ff;border-color:rgba(120,166,255,0.25)}
+    .badge.stat3{background:rgba(255,209,102,0.1);color:#ffd166;border-color:rgba(255,209,102,0.25)}
+    .badge.stat4{background:rgba(0,230,118,0.12);color:#00e676;border-color:rgba(0,230,118,0.3)}
+    .badge.spon{background:rgba(255,60,98,0.12);color:#ff3c62;border-color:rgba(255,60,98,0.3)}
+    
+    body.light .badge.ig{background:rgba(255,102,184,0.08);color:#d60072;border-color:rgba(255,102,184,0.22)}
+    body.light .badge.wa{background:rgba(0,200,83,0.08);color:#008f39;border-color:rgba(0,200,83,0.22)}
+    body.light .badge.fb{background:rgba(108,163,255,0.08);color:#0056b3;border-color:rgba(108,163,255,0.22)}
+    body.light .badge.off{background:rgba(255,209,102,0.08);color:#b38600;border-color:rgba(255,209,102,0.22)}
+    body.light .badge.stat1{background:rgba(0,0,0,0.04);color:#555;border-color:rgba(0,0,0,0.08)}
+    body.light .badge.stat2{background:rgba(120,166,255,0.08);color:#0044cc;border-color:rgba(120,166,255,0.22)}
+    body.light .badge.stat3{background:rgba(255,209,102,0.08);color:#997300;border-color:rgba(255,209,102,0.22)}
+    body.light .badge.stat4{background:rgba(0,200,83,0.08);color:#008f39;border-color:rgba(0,200,83,0.22)}
+    body.light .badge.spon{background:rgba(255,60,98,0.08);color:#d6002b;border-color:rgba(255,60,98,0.22)}
     .board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.col{background:rgba(9,27,19,.62);border:1px solid var(--line);border-radius:24px;padding:14px;min-height:500px;backdrop-filter:var(--blur)}.col h3{margin:0 0 12px;font-size:18px;letter-spacing:-.02em}
     .card{background:linear-gradient(160deg,rgba(25,67,47,.84),rgba(11,32,23,.78));border:1px solid var(--line);border-radius:20px;padding:14px;margin:11px 0;box-shadow:var(--shadow2);cursor:pointer;transition:.18s ease}.card:hover{transform:translateY(-3px);border-color:rgba(0,230,118,.36);box-shadow:0 24px 50px rgba(0,0,0,.26)}.card h4{margin:0 0 7px;letter-spacing:-.025em}.card p{color:var(--muted);font-size:13px;margin:7px 0}
     .tablewrap{overflow:auto;background:rgba(9,27,19,.68);border:1px solid var(--line);border-radius:24px;backdrop-filter:var(--blur);box-shadow:var(--shadow2)}table{width:100%;border-collapse:collapse;min-width:1000px}th,td{padding:14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.03)}td{font-size:14px}tr:hover td{background:rgba(0,230,118,.035)}.empty{padding:32px;text-align:center;color:var(--muted)}
@@ -1087,7 +1205,19 @@ function renderDashboard(){
   }
   document.getElementById('content').innerHTML=`${overdueHTML}<div class="help"><h3>Próximas prioridades</h3><p>Use este painel para controlar o pré-lançamento. O foco antes da venda é: autoridade local, histórias reais, cadastros grátis e beta.</p></div><div class="board"><div class="col"><h3>Alta prioridade</h3>${filtered().filter(p=>p.priority=='Alta'||p.priority=='Urgente').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Próximos posts</h3>${next.map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Para patrocinar</h3>${filtered().filter(p=>p.sponsor=='sim').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>WhatsApp</h3>${filtered().filter(p=>p.platform=='WhatsApp').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div></div>`;
 }
-function card(p){return `<div class="card" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()"><h4>${p.title}</h4><p>${fmtDate(p.date)} às ${p.time||'--'} • ${p.type} • ${p.phase}</p><div>${pBadges(p)}</div><p>${p.hook||''}</p></div>`}
+function card(p){
+  const hookHTML = p.hook ? `<p class="card-hook"><b>Gancho:</b> ${escapeHTML(p.hook)}</p>` : '';
+  return `<div class="card" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">
+    <div class="card-header">
+      <span class="card-time">🕒 ${p.time || '--:--'}</span>
+      <span class="card-date">${fmtDate(p.date)}</span>
+    </div>
+    <h4 class="card-title">${escapeHTML(p.title)}</h4>
+    <p class="card-subtitle">${p.type} • ${p.phase}</p>
+    <div class="pmeta" style="margin-bottom: 8px;">${pBadges(p)}</div>
+    ${hookHTML}
+  </div>`;
+}
 function renderCalendar(){
   const year=current.getFullYear(),month=current.getMonth();
   const first=new Date(year,month,1);
@@ -1106,7 +1236,11 @@ function renderCalendar(){
         const isLate = isPostOverdue(p);
         const pillStyle = isLate ? 'border-color: rgba(255, 60, 98, 0.45); background: linear-gradient(135deg, rgba(255, 60, 98, 0.16), rgba(255, 255, 255, 0.02));' : '';
         return `<button class="postpill" style="${pillStyle}" draggable="true" ondragstart="startCalendarDrag(event, '${p.id}')" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">
-          <b>${p.time||''} ${hasAssets(p)?'🖼️ ':''}${p.title}</b>
+          <div class="pill-header">
+            <span class="pill-time">🕒 ${p.time || '--:--'}</span>
+            ${hasAssets(p) ? '<span class="pill-media-icon" title="Possui mídia carregada">🖼️</span>' : ''}
+          </div>
+          <div class="pill-title">${escapeHTML(p.title)}</div>
           <div class="pmeta">${pBadges(p)}</div>
         </button>`;
       }).join('')}
