@@ -958,13 +958,13 @@ function savePost(){
   render();
 }
 function duplicatePost(){const id=document.getElementById('postId').value;if(!id){savePost();return}const p=posts.find(x=>x.id==id);const n={...p,id:'p'+Date.now(),title:p.title+' (cópia)',status:'Ideia'};posts.push(n);save();closeModal();render()}
-async function deletePost(){
+function deletePost(){
   const id=document.getElementById('postId').value;
   if(!id){closeModal();return}
   if(confirm('Excluir este post?')){
     posts=posts.filter(p=>p.id!=id);
     save();
-    await deleteFromSupabase(id);
+    deleteFromSupabase(id); // Roda em background
     closeModal();
     render();
   }
