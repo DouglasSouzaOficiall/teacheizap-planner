@@ -719,6 +719,33 @@
     </div>
   </div>
 </div>
+
+<!-- Modal para Edição da Rota de Lançamento -->
+<div class="modalBackdrop" id="strategyEditModalBackdrop" style="z-index: 140;">
+  <div class="modal" style="max-width: 820px; height: 85vh; max-height: 750px;">
+    <div class="modalHeader">
+      <h3 id="strategyEditModalTitle">Editar Rota do Lançamento</h3>
+      <button class="close" onclick="closeStrategyEditModal()">×</button>
+    </div>
+    <div class="modalBody">
+      <div class="help" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; margin-bottom: 20px;">
+        <div>
+          <label style="color: var(--brand); font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Título do Método</label>
+          <input type="text" id="editMethodTitle" style="font-size: 18px; font-weight: bold; margin-bottom: 0;">
+        </div>
+        <div>
+          <label style="color: var(--brand); font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Descrição do Método</label>
+          <textarea id="editMethodDesc" style="min-height: 80px; font-size: 14px; margin-bottom: 0;"></textarea>
+        </div>
+      </div>
+      <div id="strategyPhasesEditContainer"></div>
+    </div>
+    <div class="actions" style="margin: 0; padding: 20px 28px; background: rgba(5,15,11,0.85); border-top: 1px solid var(--line); display: flex; gap: 12px; justify-content: flex-end; flex-shrink: 0; z-index: 5;">
+      <button class="btn" onclick="closeStrategyEditModal()">Cancelar</button>
+      <button class="btn primary" onclick="saveStrategyData()">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
 <script>
 const BRAND_LOGO = "logo_oficial.png";
 
@@ -1045,65 +1072,51 @@ function openPostPreview(id){
 function closePostPreview(){document.getElementById('postPreviewScreen').classList.remove('show')}
 function editFromPreview(id){closePostPreview();editPost(id)}
 
-let isEditingStrategy = false;
-
 function renderStrategy(){
   const s = getStrategy();
-  if (!isEditingStrategy) {
-    const phasesHTML = s.phases.map((ph, idx) => `
-      <div class="phase">
-        <b>${escapeHTML(ph.title)}</b>
-        <p>${escapeHTML(ph.desc)}</p>
-      </div>
-    `).join('');
-    
-    document.getElementById('content').innerHTML = `
-      <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
-        <button class="btn primary" onclick="toggleEditStrategy(true)">Editar Rota do Lançamento</button>
-      </div>
-      <div class="help">
-        <h3>${escapeHTML(s.methodTitle)}</h3>
-        <p>${escapeHTML(s.methodDesc)}</p>
-      </div>
-      ${phasesHTML}
-    `;
-  } else {
-    const phasesEditHTML = s.phases.map((ph, idx) => `
-      <div class="phase" style="border-left: 6px solid var(--brand); padding: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.02);">
-        <div style="margin-bottom: 8px;">
-          <label style="font-size: 11px; margin-bottom: 4px; text-transform: uppercase; color: var(--muted);">Título da Fase ${idx + 1}</label>
-          <input type="text" id="editPhaseTitle_${idx}" value="${escapeHTML(ph.title)}" style="font-weight: bold; font-size: 15px; margin-bottom: 0;">
-        </div>
-        <div>
-          <label style="font-size: 11px; margin-bottom: 4px; text-transform: uppercase; color: var(--muted);">Descrição / Instrução da Fase ${idx + 1}</label>
-          <textarea id="editPhaseDesc_${idx}" style="min-height: 60px; font-size: 14px; margin-bottom: 0;">${escapeHTML(ph.desc)}</textarea>
-        </div>
-      </div>
-    `).join('');
-
-    document.getElementById('content').innerHTML = `
-      <div style="margin-bottom: 20px; display: flex; justify-content: flex-end; gap: 10px;">
-        <button class="btn" onclick="toggleEditStrategy(false)">Cancelar</button>
-        <button class="btn primary" onclick="saveStrategyData()">Salvar Alterações</button>
-      </div>
-      <div class="help" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; margin-bottom: 20px;">
-        <div>
-          <label style="color: var(--brand); font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Título do Método</label>
-          <input type="text" id="editMethodTitle" value="${escapeHTML(s.methodTitle)}" style="font-size: 18px; font-weight: bold; border-color: rgba(0,230,118,0.2); margin-bottom: 0;">
-        </div>
-        <div>
-          <label style="color: var(--brand); font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Descrição do Método</label>
-          <textarea id="editMethodDesc" style="min-height: 80px; font-size: 14px; margin-bottom: 0;">${escapeHTML(s.methodDesc)}</textarea>
-        </div>
-      </div>
-      ${phasesEditHTML}
-    `;
-  }
+  const phasesHTML = s.phases.map((ph, idx) => `
+    <div class="phase">
+      <b>${escapeHTML(ph.title)}</b>
+      <p>${escapeHTML(ph.desc)}</p>
+    </div>
+  `).join('');
+  
+  document.getElementById('content').innerHTML = `
+    <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+      <button class="btn primary" onclick="openStrategyEditModal()">Editar Rota do Lançamento</button>
+    </div>
+    <div class="help">
+      <h3>${escapeHTML(s.methodTitle)}</h3>
+      <p>${escapeHTML(s.methodDesc)}</p>
+    </div>
+    ${phasesHTML}
+  `;
 }
 
-function toggleEditStrategy(val) {
-  isEditingStrategy = val;
-  renderStrategy();
+function openStrategyEditModal() {
+  const s = getStrategy();
+  document.getElementById('editMethodTitle').value = s.methodTitle;
+  document.getElementById('editMethodDesc').value = s.methodDesc;
+  
+  const phasesEditHTML = s.phases.map((ph, idx) => `
+    <div class="phase" style="border-left: 6px solid var(--brand); padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.01); border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);">
+      <div style="margin-bottom: 8px;">
+        <label style="font-size: 11px; margin-bottom: 4px; text-transform: uppercase; color: var(--muted);">Título da Fase ${idx + 1}</label>
+        <input type="text" id="editPhaseTitle_${idx}" value="${escapeHTML(ph.title)}" style="font-weight: bold; font-size: 15px; margin-bottom: 0;">
+      </div>
+      <div>
+        <label style="font-size: 11px; margin-bottom: 4px; text-transform: uppercase; color: var(--muted);">Descrição / Instrução da Fase ${idx + 1}</label>
+        <textarea id="editPhaseDesc_${idx}" style="min-height: 60px; font-size: 14px; margin-bottom: 0;">${escapeHTML(ph.desc)}</textarea>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('strategyPhasesEditContainer').innerHTML = phasesEditHTML;
+  document.getElementById('strategyEditModalBackdrop').classList.add('show');
+}
+
+function closeStrategyEditModal() {
+  document.getElementById('strategyEditModalBackdrop').classList.remove('show');
 }
 
 function saveStrategyData() {
@@ -1119,7 +1132,7 @@ function saveStrategyData() {
     });
   }
   saveStrategy(s);
-  isEditingStrategy = false;
+  closeStrategyEditModal();
   renderStrategy();
 }
 function renderSettings(){
@@ -1414,7 +1427,7 @@ async function resetSeed(){
   }
 }
 ['title','hook','copy','cta','platform'].forEach(id=>document.getElementById(id)?.addEventListener('input',updatePostPreview));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closePostPreview();closeTextEditModal();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closePostPreview();closeTextEditModal();closeStrategyEditModal();}});
 applyTheme();
 loadFromSupabase();
 </script>
