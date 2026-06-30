@@ -1180,10 +1180,60 @@ function getTimeColor(timeStr) {
   return Math.round(hue) % 360;
 }
 
+function getTimeCardColors(timeStr, isLight) {
+  const hue = getTimeColor(timeStr);
+  
+  if (isLight) {
+    // Solid clean premium pastel background colors and matching dark text colors
+    if (hue >= 90 && hue < 160) {
+      // Green
+      return {
+        bg: '#ebf7ee',
+        border: '#c3e6cb',
+        title: '#145a32',
+        text: '#1e8449'
+      };
+    } else if (hue >= 160 && hue < 240) {
+      // Blue
+      return {
+        bg: '#e8f4fd',
+        border: '#bee3f8',
+        title: '#1b4f72',
+        text: '#2e86c1'
+      };
+    } else if (hue >= 240 && hue < 320) {
+      // Purple
+      return {
+        bg: '#f5eef8',
+        border: '#e8daef',
+        title: '#512e5f',
+        text: '#7d3c98'
+      };
+    } else {
+      // Yellow
+      return {
+        bg: '#fef9e7',
+        border: '#fdebd0',
+        title: '#7d6608',
+        text: '#b7950b'
+      };
+    }
+  } else {
+    // Dark mode
+    return {
+      bg: `linear-gradient(160deg, hsla(${hue}, 45%, 11%, 0.9) 0%, hsla(${hue}, 20%, 6%, 0.95) 100%)`,
+      border: `hsla(${hue}, 30%, 20%, 0.5)`,
+      title: '#ffffff',
+      text: '#a9cbb7'
+    };
+  }
+}
+
 function getPostPillStyle(p) {
   const hue = getTimeColor(p.time);
   const isLate = isPostOverdue(p);
   const isLight = document.body.classList.contains('light');
+  const colors = getTimeCardColors(p.time, isLight);
   
   let styles = `border-left: 4px solid hsl(${hue}, 85%, ${isLight ? 42 : 50}%) !important;`;
   
@@ -1192,9 +1242,7 @@ function getPostPillStyle(p) {
       ? 'border-color: rgba(255, 60, 98, 0.45) !important; background: linear-gradient(135deg, rgba(255, 60, 98, 0.08), #ffffff) !important; outline: 1px solid rgba(255, 60, 98, 0.3);' 
       : 'border-color: rgba(255, 60, 98, 0.45) !important; background: linear-gradient(135deg, rgba(255, 60, 98, 0.16), rgba(255, 255, 255, 0.02)) !important; outline: 1px solid rgba(255, 60, 98, 0.3);';
   } else {
-    styles += isLight
-      ? `background: linear-gradient(135deg, hsla(${hue}, 85%, 92%, 0.95), hsla(${hue}, 80%, 96%, 0.95)) !important; border-color: hsla(${hue}, 45%, 82%, 0.8) !important;`
-      : `background: linear-gradient(135deg, hsla(${hue}, 50%, 12%, 0.8), hsla(${hue}, 25%, 7%, 0.9)) !important; border-color: hsla(${hue}, 30%, 25%, 0.5) !important;`;
+    styles += `background: ${colors.bg} !important; border-color: ${colors.border} !important;`;
   }
   return styles;
 }
@@ -1203,6 +1251,7 @@ function getCardStyle(p) {
   const hue = getTimeColor(p.time);
   const isLate = isPostOverdue(p);
   const isLight = document.body.classList.contains('light');
+  const colors = getTimeCardColors(p.time, isLight);
   
   let styles = `border-left: 4px solid hsl(${hue}, 85%, ${isLight ? 42 : 50}%) !important;`;
   
@@ -1211,9 +1260,7 @@ function getCardStyle(p) {
       ? 'border-color: rgba(255, 60, 98, 0.45) !important; background: linear-gradient(135deg, rgba(255, 60, 98, 0.08), #ffffff) !important; outline: 1px solid rgba(255, 60, 98, 0.3);' 
       : 'border-color: rgba(255, 60, 98, 0.45) !important; background: linear-gradient(135deg, rgba(255, 60, 98, 0.16), rgba(255, 255, 255, 0.02)) !important; outline: 1px solid rgba(255, 60, 98, 0.3);';
   } else {
-    styles += isLight
-      ? `background: linear-gradient(135deg, hsla(${hue}, 85%, 92%, 0.95), hsla(${hue}, 80%, 96%, 0.95)) !important; border-color: hsla(${hue}, 45%, 82%, 0.8) !important;`
-      : `background: linear-gradient(160deg, hsla(${hue}, 45%, 11%, 0.9) 0%, hsla(${hue}, 20%, 6%, 0.95) 100%) !important; border-color: hsla(${hue}, 30%, 20%, 0.5) !important;`;
+    styles += `background: ${colors.bg} !important; border-color: ${colors.border} !important;`;
   }
   return styles;
 }
@@ -1286,15 +1333,34 @@ function renderDashboard(){
   document.getElementById('content').innerHTML=`${overdueHTML}<div class="help"><h3>Próximas prioridades</h3><p>Use este painel para controlar o pré-lançamento. O foco antes da venda é: autoridade local, histórias reais, cadastros grátis e beta.</p></div><div class="board"><div class="col"><h3>Alta prioridade</h3>${filtered().filter(p=>p.priority=='Alta'||p.priority=='Urgente').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Próximos posts</h3>${next.map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Para patrocinar</h3>${filtered().filter(p=>p.sponsor=='sim').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>WhatsApp</h3>${filtered().filter(p=>p.platform=='WhatsApp').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div></div>`;
 }
 function card(p){
-  const hookHTML = p.hook ? `<p class="card-hook"><b>Gancho:</b> ${escapeHTML(p.hook)}</p>` : '';
+  const isLight = document.body.classList.contains('light');
+  const isLate = isPostOverdue(p);
+  const colors = getTimeCardColors(p.time, isLight);
   const cardStyle = getCardStyle(p);
+  
+  let titleStyle = '';
+  let subStyle = '';
+  let hookStyle = '';
+  let timeStyle = '';
+  let dateStyle = '';
+  
+  if (isLight && !isLate) {
+    titleStyle = `color: ${colors.title} !important;`;
+    subStyle = `color: ${colors.text} !important; opacity: 0.95;`;
+    hookStyle = `color: ${colors.text} !important; border-top-color: ${colors.border} !important;`;
+    timeStyle = `color: ${colors.title} !important; background: rgba(0,0,0,0.03) !important; border-color: ${colors.border} !important;`;
+    dateStyle = `color: ${colors.text} !important; opacity: 0.8;`;
+  }
+
+  const hookHTML = p.hook ? `<p class="card-hook" style="${hookStyle}"><b>Gancho:</b> ${escapeHTML(p.hook)}</p>` : '';
+
   return `<div class="card" style="${cardStyle}" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">
     <div class="card-header">
-      <span class="card-time">🕒 ${p.time || '--:--'}</span>
-      <span class="card-date">${fmtDate(p.date)}</span>
+      <span class="card-time" style="${timeStyle}">🕒 ${p.time || '--:--'}</span>
+      <span class="card-date" style="${dateStyle}">${fmtDate(p.date)}</span>
     </div>
-    <h4 class="card-title">${escapeHTML(p.title)}</h4>
-    <p class="card-subtitle">${p.type} • ${p.phase}</p>
+    <h4 class="card-title" style="${titleStyle}">${escapeHTML(p.title)}</h4>
+    <p class="card-subtitle" style="${subStyle}">${p.type} • ${p.phase}</p>
     <div class="pmeta" style="margin-bottom: 8px;">${pBadges(p)}</div>
     ${hookHTML}
   </div>`;
@@ -1315,12 +1381,18 @@ function renderCalendar(){
       <div class="daynum">${d.getDate()} ${d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>
       ${items.map(p=> {
         const pillStyle = getPostPillStyle(p);
+        const isLight = document.body.classList.contains('light');
+        const isLate = isPostOverdue(p);
+        const colors = getTimeCardColors(p.time, isLight);
+        const titleStyle = isLight && !isLate ? `color: ${colors.title} !important;` : '';
+        const timeStyle = isLight && !isLate ? `color: ${colors.title} !important; background: rgba(0,0,0,0.03) !important;` : '';
+
         return `<button class="postpill" style="${pillStyle}" draggable="true" ondragstart="startCalendarDrag(event, '${p.id}')" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">
           <div class="pill-header">
-            <span class="pill-time">🕒 ${p.time || '--:--'}</span>
+            <span class="pill-time" style="${timeStyle}">🕒 ${p.time || '--:--'}</span>
             ${hasAssets(p) ? '<span class="pill-media-icon" title="Possui mídia carregada">🖼️</span>' : ''}
           </div>
-          <div class="pill-title">${escapeHTML(p.title)}</div>
+          <div class="pill-title" style="${titleStyle}">${escapeHTML(p.title)}</div>
           <div class="pmeta">${pBadges(p)}</div>
         </button>`;
       }).join('')}
