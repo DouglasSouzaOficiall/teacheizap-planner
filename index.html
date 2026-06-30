@@ -570,6 +570,16 @@
     }
     .feedTile.dragging{opacity:.45;outline:3px solid var(--brand)}
     .feedTile.dropTarget{outline:3px solid var(--brand);transform:scale(.98)}
+    .day.dropTargetDay {
+      border-color: var(--brand) !important;
+      background: linear-gradient(160deg, rgba(0, 230, 118, 0.12), rgba(8, 24, 17, 0.85)) !important;
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.2) !important;
+    }
+    body.light .day.dropTargetDay {
+      border-color: var(--brand) !important;
+      background: linear-gradient(160deg, rgba(0, 230, 118, 0.08), rgba(255, 255, 255, 0.95)) !important;
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.15) !important;
+    }
     .reorderHint{font-size:13px;color:var(--muted);margin-top:8px}.feedTile .orderTag{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.52);color:#fff;font-size:10px;border-radius:999px;padding:3px 7px;font-weight:900}
     #textEditModalBackdrop .modal {
       max-width: 720px;
@@ -998,15 +1008,114 @@ function saveStrategy(strategyData) {
   }
   save();
 }
+function isPostOverdue(p) {
+  if (!p || p.id === 'strategy_data') return false;
+  if (!p.date || p.status === 'Publicado') return false;
+  const todayISO = new Date().toISOString().slice(0, 10);
+  return p.date < todayISO;
+}
+
+function getOverduePosts() {
+  const todayISO = new Date().toISOString().slice(0, 10);
+  return posts.filter(p => p.id !== 'strategy_data' && p.date && p.date < todayISO && p.status !== 'Publicado');
+}
+
+let dragCalendarPostId = null;
+
+function startCalendarDrag(e, id) {
+  dragCalendarPostId = id;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function allowCalendarDrop(e) {
+  e.preventDefault();
+  const dayCell = e.currentTarget.closest('.day');
+  if (dayCell) dayCell.classList.add('dropTargetDay');
+}
+
+function leaveCalendarDay(e) {
+  const dayCell = e.currentTarget.closest('.day');
+  if (dayCell) dayCell.classList.remove('dropTargetDay');
+}
+
+function dropCalendarPost(e, targetDate) {
+  e.preventDefault();
+  const dayCell = e.currentTarget.closest('.day');
+  if (dayCell) dayCell.classList.remove('dropTargetDay');
+  
+  if (!dragCalendarPostId) return;
+  const post = posts.find(p => p.id === dragCalendarPostId);
+  if (post && post.date !== targetDate) {
+    post.date = targetDate;
+    save();
+    render();
+  }
+  dragCalendarPostId = null;
+}
+
 function setView(v){view=v;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==v));applyTheme();render();}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 function stats(){const f=filtered();const total=f.length;const ag=f.filter(p=>p.status=='Agendado').length;const pub=f.filter(p=>p.status=='Publicado').length;const pat=f.filter(p=>p.sponsor=='sim').length;const ig=f.filter(p=>p.platform=='Instagram').length;document.getElementById('stats').innerHTML=`<div class="stat"><b>${total}</b><span>Posts no filtro</span></div><div class="stat"><b>${ig}</b><span>Instagram</span></div><div class="stat"><b>${ag}</b><span>Agendados</span></div><div class="stat"><b>${pub}</b><span>Publicados</span></div><div class="stat"><b>${pat}</b><span>Para patrocinar</span></div>`;}
 function monthName(d){return d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}
 function render(){stats();document.getElementById('monthLabel').textContent=monthName(current);const titles={dashboard:['Visão geral','Resumo dos conteúdos, próximos posts e prioridades.'],calendar:['Calendário','Organize as postagens por dia e canal.'],kanban:['Kanban','Controle produção por status.'],list:['Lista completa','Edite, filtre e exporte todos os posts.'],feed:['Prévia do Feed','Veja suas artes aplicadas em um mockup de perfil do Instagram antes de publicar.'],strategy:['Rota do lançamento','Método de aquecimento, beta e comercialização.'],settings:['Backup e uso','Como usar localmente e proteger seus dados.']};document.getElementById('viewTitle').textContent=titles[view][0];document.getElementById('viewSub').textContent=titles[view][1];if(view==='dashboard')renderDashboard();if(view==='calendar')renderCalendar();if(view==='kanban')renderKanban();if(view==='list')renderList();if(view==='feed')renderFeed();if(view==='strategy')renderStrategy();if(view==='settings')renderSettings();}
-function pBadges(p){return `${hasAssets(p)?'<span class="hasAssetDot" title="Arte pronta"></span>':''}<span class="badge ${p.platform=='Instagram'?'ig':p.platform=='WhatsApp'?'wa':p.platform=='Facebook'?'fb':'off'}">${p.platform}</span><span class="badge ${p.status=='Ideia'?'stat1':p.status=='Produzindo'?'stat2':p.status=='Agendado'?'stat3':'stat4'}">${p.status}</span>${p.sponsor=='sim'?'<span class="badge spon">PAT</span>':''}`}
-function renderDashboard(){const next=filtered().filter(p=>p.status!='Publicado').slice(0,8);document.getElementById('content').innerHTML=`<div class="help"><h3>Próximas prioridades</h3><p>Use este painel para controlar o pré-lançamento. O foco antes da venda é: autoridade local, histórias reais, cadastros grátis e beta.</p></div><div class="board"><div class="col"><h3>Alta prioridade</h3>${filtered().filter(p=>p.priority=='Alta'||p.priority=='Urgente').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Próximos posts</h3>${next.map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Para patrocinar</h3>${filtered().filter(p=>p.sponsor=='sim').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>WhatsApp</h3>${filtered().filter(p=>p.platform=='WhatsApp').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div></div>`;}
+function pBadges(p){
+  const late = isPostOverdue(p) ? '<span class="badge" style="background: #ff3c62; color: #fff; margin-right: 4px; border-color: rgba(255,255,255,0.1); padding: 3px 6px; font-weight: 900; letter-spacing: 0;">⚠️ ATRASADO</span>' : '';
+  return `${late}${hasAssets(p)?'<span class="hasAssetDot" title="Arte pronta"></span>':''}<span class="badge ${p.platform=='Instagram'?'ig':p.platform=='WhatsApp'?'wa':p.platform=='Facebook'?'fb':'off'}">${p.platform}</span><span class="badge ${p.status=='Ideia'?'stat1':p.status=='Produzindo'?'stat2':p.status=='Agendado'?'stat3':'stat4'}">${p.status}</span>${p.sponsor=='sim'?'<span class="badge spon">PAT</span>':''}`;
+}
+function renderDashboard(){
+  const next=filtered().filter(p=>p.status!='Publicado').slice(0,8);
+  const overdue = getOverduePosts();
+  let overdueHTML = '';
+  if (overdue.length > 0) {
+    overdueHTML = `
+      <div class="help" style="background: linear-gradient(135deg, rgba(255, 60, 98, 0.12), rgba(255, 255, 255, 0.03)); border: 1px solid rgba(255, 60, 98, 0.3); color: #ffebec; margin-bottom: 20px;">
+        <h3 style="color: #ff3c62; display: flex; align-items: center; gap: 8px; margin: 0 0 10px 0; font-size: 20px;">
+          ⚠️ Atenção: Postagens Atrasadas (${overdue.length})
+        </h3>
+        <p style="margin: 0 0 14px 0; font-size: 14px; opacity: 0.95;">
+          Você tem postagens cujas datas programadas já passaram, mas o status não está como "Publicado". Clique em qualquer uma abaixo para ajustar.
+        </p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          ${overdue.map(p => `
+            <button class="postpill" style="margin: 0; background: rgba(255,60,98,0.12); border-color: rgba(255,60,98,0.25); color: #ffeaec; flex: 1; min-width: 200px; max-width: 340px; text-align: left;" onclick="openPostPreview('${p.id}')">
+              <b>${fmtDate(p.date)} às ${p.time || '--'}</b> • ${escapeHTML(p.title)}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  document.getElementById('content').innerHTML=`${overdueHTML}<div class="help"><h3>Próximas prioridades</h3><p>Use este painel para controlar o pré-lançamento. O foco antes da venda é: autoridade local, histórias reais, cadastros grátis e beta.</p></div><div class="board"><div class="col"><h3>Alta prioridade</h3>${filtered().filter(p=>p.priority=='Alta'||p.priority=='Urgente').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Próximos posts</h3>${next.map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>Para patrocinar</h3>${filtered().filter(p=>p.sponsor=='sim').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div><div class="col"><h3>WhatsApp</h3>${filtered().filter(p=>p.platform=='WhatsApp').slice(0,8).map(card).join('')||'<div class="empty">Sem itens.</div>'}</div></div>`;
+}
 function card(p){return `<div class="card" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()"><h4>${p.title}</h4><p>${fmtDate(p.date)} às ${p.time||'--'} • ${p.type} • ${p.phase}</p><div>${pBadges(p)}</div><p>${p.hook||''}</p></div>`}
-function renderCalendar(){const year=current.getFullYear(),month=current.getMonth();const first=new Date(year,month,1);const start=new Date(first);start.setDate(start.getDate()-first.getDay());let html='<div class="calendarHead"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div><div class="calendar">';const f=filtered();for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=d.toISOString().slice(0,10);const items=f.filter(p=>p.date==iso);html+=`<div class="day ${d.getMonth()!=month?'out':''}"><div class="daynum">${d.getDate()} ${d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>${items.map(p=>`<button class="postpill" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()"><b>${p.time||''} ${hasAssets(p)?'🖼️ ':''}${p.title}</b><div class="pmeta">${pBadges(p)}</div></button>`).join('')}<button class="postpill" style="background:transparent;border-style:dashed;color:var(--muted)" onclick="openModal('${iso}')">+ Post</button></div>`}html+='</div>';document.getElementById('content').innerHTML=html;}
+function renderCalendar(){
+  const year=current.getFullYear(),month=current.getMonth();
+  const first=new Date(year,month,1);
+  const start=new Date(first);
+  start.setDate(start.getDate()-first.getDay());
+  let html='<div class="calendarHead"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div><div class="calendar">';
+  const f=filtered();
+  for(let i=0;i<42;i++){
+    const d=new Date(start);
+    d.setDate(start.getDate()+i);
+    const iso=d.toISOString().slice(0,10);
+    const items=f.filter(p=>p.date==iso);
+    html+=`<div class="day ${d.getMonth()!=month?'out':''}" ondragover="allowCalendarDrop(event)" ondragleave="leaveCalendarDay(event)" ondrop="dropCalendarPost(event, '${iso}')">
+      <div class="daynum">${d.getDate()} ${d.toLocaleDateString('pt-BR',{weekday:'short'})}</div>
+      ${items.map(p=> {
+        const isLate = isPostOverdue(p);
+        const pillStyle = isLate ? 'border-color: rgba(255, 60, 98, 0.45); background: linear-gradient(135deg, rgba(255, 60, 98, 0.16), rgba(255, 255, 255, 0.02));' : '';
+        return `<button class="postpill" style="${pillStyle}" draggable="true" ondragstart="startCalendarDrag(event, '${p.id}')" onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()">
+          <b>${p.time||''} ${hasAssets(p)?'🖼️ ':''}${p.title}</b>
+          <div class="pmeta">${pBadges(p)}</div>
+        </button>`;
+      }).join('')}
+      <button class="postpill" style="background:transparent;border-style:dashed;color:var(--muted)" onclick="openModal('${iso}')">+ Post</button>
+    </div>`;
+  }
+  html+='</div>';
+  document.getElementById('content').innerHTML=html;
+}
 function renderKanban(){const statuses=['Ideia','Produzindo','Agendado','Publicado'];document.getElementById('content').innerHTML='<div class="board">'+statuses.map(s=>`<div class="col"><h3>${s}</h3>${filtered().filter(p=>p.status==s).map(card).join('')||'<div class="empty">Sem posts.</div>'}</div>`).join('')+'</div>';}
 function renderList(){const rows=filtered().map(p=>`<tr onclick="openPostPreview('${p.id}')" onmouseenter="showHover(event,'${p.id}')" onmousemove="moveHover(event)" onmouseleave="hideHover()" style="cursor:pointer"><td>${fmtDate(p.date)}<br><span class="small">${p.time||''}</span></td><td><b>${hasAssets(p)?'🖼️ ':''}${p.title}</b><br><span class="small">${p.hook||''}</span></td><td>${p.platform}<br><span class="small">${p.type}</span></td><td>${p.phase}</td><td>${p.status}</td><td>${p.sponsor=='sim'?'Sim':'Não'}</td><td>${p.cta||''}</td></tr>`).join('');document.getElementById('content').innerHTML=`<div class="tablewrap"><table><thead><tr><th>Data</th><th>Conteúdo</th><th>Canal</th><th>Fase</th><th>Status</th><th>Patrocinar</th><th>CTA</th></tr></thead><tbody>${rows}</tbody></table></div>`;}
 
