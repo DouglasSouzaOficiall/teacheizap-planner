@@ -487,6 +487,29 @@
       <div><label>Prioridade</label><select id="priority"><option>Normal</option><option>Alta</option><option>Urgente</option></select></div>
       <div><label>Responsável</label><input id="owner" placeholder="Douglas / Designer / Editor"></div>
       <div class="full"><label>Observações</label><textarea id="notes"></textarea></div>
+      
+      <!-- Seção de Referências e Inspirações -->
+      <div class="full" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 14px;">
+        <div style="grid-column: 1 / -1;"><h4 style="margin: 0 0 4px 0; color: var(--brand);">Referências & Inspirações</h4></div>
+        <div class="full" style="grid-column: 1 / -1;">
+          <label>Ideia de Referência / Inspiração</label>
+          <textarea id="refText" placeholder="Descreva aqui o conceito da referência, paleta de cores, inspirações..."></textarea>
+        </div>
+        <div>
+          <label>Imagem de Referência (URL)</label>
+          <input type="text" id="refImage" placeholder="https://exemplo.com/imagem.png" oninput="updateRefImagePreview()">
+          <div id="refImagePreviewContainer" style="margin-top:8px; display:none; max-width:100%; height:120px; border-radius:10px; overflow:hidden; border:1px solid var(--line); background: rgba(0,0,0,0.05);">
+            <img id="refImagePreview" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+        </div>
+        <div>
+          <label>Link de Referência / Link Útil (URL)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="refLink" placeholder="https://pinterest.com/pin/... ou Canva" style="flex:1; margin:0;">
+            <button type="button" class="btn" onclick="openRefLink()" style="padding: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 15px; flex-shrink:0; margin:0;"><span style="font-size:16px;">🔗</span></button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="igPreviewWrap">
       <div class="igPhone"><div class="igPost" id="igPreview"></div></div>
@@ -556,6 +579,9 @@ async function loadFromSupabase() {
         priority: p.priority,
         owner: p.owner,
         notes: p.notes,
+        refText: p.ref_text,
+        refImage: p.ref_image,
+        refLink: p.ref_link,
         feedPos: p.feed_pos,
         feedPosFeed: p.feed_pos_feed,
         feedPosReels: p.feed_pos_reels,
@@ -608,6 +634,9 @@ async function saveToSupabase() {
       priority: p.priority || 'Normal',
       owner: p.owner || '',
       notes: p.notes || '',
+      ref_text: p.refText || '',
+      ref_image: p.refImage || '',
+      ref_link: p.refLink || '',
       feed_pos: Number.isFinite(Number(p.feedPos)) ? Number(p.feedPos) : null,
       feed_pos_feed: Number.isFinite(Number(p.feedPosFeed)) ? Number(p.feedPosFeed) : null,
       feed_pos_reels: Number.isFinite(Number(p.feedPosReels)) ? Number(p.feedPosReels) : null,
@@ -762,7 +791,24 @@ function dropFeedDrag(e,targetId){e.preventDefault();document.querySelectorAll('
 function resetFeedOrder(){posts.forEach(p=>{delete p.feedPos; delete p.feedPosFeed; delete p.feedPosReels});save();renderFeed()}
 function escapeHTML(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function postInstagramHTML(p){const cap=escapeHTML((p.copy||p.hook||'Legenda do post aparece aqui.')).slice(0,900);return `<div class="igTop"><div class="igAvatar"><img src="${BRAND_LOGO}" alt="TeAcheiZAP"></div><div><div class="igName">teacheizap</div><div class="igLoc">Leme, SP • ${escapeHTML(p.platform||'Instagram')}</div></div></div><div class="igMedia">${mediaHTML(p)}</div><div class="igActions">♡ 💬 ✈︎ <span style="margin-left:auto">▢</span></div><div class="igCaption"><b>teacheizap</b> ${cap}${cap.length>=900?' <span class="igMore">... mais</span>':''}<br><span class="igMore">${escapeHTML(p.cta||'TeAcheiZAP, sua lista telefônica no WhatsApp!')}</span></div>`}
-function openPostPreview(id){const p=posts.find(x=>x.id==id);if(!p)return;hideHover();document.getElementById('postPreviewScreen').innerHTML=`<div class="previewTopbar"><div><h2>Prévia do post no Instagram</h2><div class="small">Visualização em tela inteira com a arte aplicada no mockup.</div></div><button class="close" onclick="closePostPreview()">×</button></div><div class="previewFullGrid"><div class="fullMockPhone"><div class="igPost">${postInstagramHTML(p)}</div></div><div class="previewInfo"><h3>${escapeHTML(p.title||'Post sem título')}</h3><div class="pmeta">${pBadges(p)}</div><p><b>Data:</b> ${fmtDate(p.date)} às ${p.time||'--'}<br><b>Formato:</b> ${escapeHTML(p.type)} • <b>Fase:</b> ${escapeHTML(p.phase)}</p><div class="bigcopy"><b>Gancho:</b> ${escapeHTML(p.hook||'')}\n\n<b>Legenda/mensagem:</b> ${escapeHTML(p.copy||'')}\n\n<b>CTA:</b> ${escapeHTML(p.cta||'')}</div><div class="bigcopy"><b>Roteiro visual:</b>\n${escapeHTML(p.visual||'')}</div><div class="previewBtns"><button class="btn primary" onclick="editFromPreview('${p.id}')">Editar conteúdo / trocar arte</button><button class="btn" onclick="closePostPreview();setView('feed')">Ver feed inteiro</button><button class="btn" onclick="closePostPreview()">Fechar</button></div></div></div>`;document.getElementById('postPreviewScreen').classList.add('show')}
+function openPostPreview(id){
+  const p=posts.find(x=>x.id==id);
+  if(!p)return;
+  hideHover();
+
+  const hasRefs = p.refText || p.refImage || p.refLink;
+  const refsHTML = hasRefs ? `
+    <div class="bigcopy" style="border-left: 4px solid var(--brand); background: rgba(0, 230, 118, 0.03);">
+      <b style="color: var(--brand); display: block; margin-bottom: 8px; font-size: 15px;">Referências & Inspirações</b>
+      ${p.refText ? `<p style="margin: 0 0 10px 0; white-space: pre-wrap; font-size:14px; line-height:1.42;">${escapeHTML(p.refText)}</p>` : ''}
+      ${p.refImage ? `<div style="margin-top:10px; margin-bottom:10px; max-width:300px; border-radius:12px; overflow:hidden; border:1px solid var(--line);"><a href="${escapeHTML(p.refImage)}" target="_blank" title="Clique para abrir imagem original"><img src="${escapeHTML(p.refImage)}" style="width:100%; max-height:220px; object-fit:cover; display:block;"></a></div>` : ''}
+      ${p.refLink ? `<a href="${escapeHTML(p.refLink)}" target="_blank" class="btn" style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; font-size:13px; margin-top:6px; background: rgba(0, 124, 60, 0.05); color: var(--soft); border-color: rgba(0, 124, 60, 0.2);">🔗 Acessar Link Útil</a>` : ''}
+    </div>
+  ` : '';
+
+  document.getElementById('postPreviewScreen').innerHTML=`<div class="previewTopbar"><div><h2>Prévia do post no Instagram</h2><div class="small">Visualização em tela inteira com a arte aplicada no mockup.</div></div><button class="close" onclick="closePostPreview()">×</button></div><div class="previewFullGrid"><div class="fullMockPhone"><div class="igPost">${postInstagramHTML(p)}</div></div><div class="previewInfo"><h3>${escapeHTML(p.title||'Post sem título')}</h3><div class="pmeta">${pBadges(p)}</div><p><b>Data:</b> ${fmtDate(p.date)} às ${p.time||'--'}<br><b>Formato:</b> ${escapeHTML(p.type)} • <b>Fase:</b> ${escapeHTML(p.phase)}</p><div class="bigcopy"><b>Gancho:</b> ${escapeHTML(p.hook||'')}\n\n<b>Legenda/mensagem:</b> ${escapeHTML(p.copy||'')}\n\n<b>CTA:</b> ${escapeHTML(p.cta||'')}</div><div class="bigcopy"><b>Roteiro visual:</b>\n${escapeHTML(p.visual||'')}</div>${refsHTML}<div class="previewBtns"><button class="btn primary" onclick="editFromPreview('${p.id}')">Editar conteúdo / trocar arte</button><button class="btn" onclick="closePostPreview();setView('feed')">Ver feed inteiro</button><button class="btn" onclick="closePostPreview()">Fechar</button></div></div></div>`;
+  document.getElementById('postPreviewScreen').classList.add('show');
+}
 function closePostPreview(){document.getElementById('postPreviewScreen').classList.remove('show')}
 function editFromPreview(id){closePostPreview();editPost(id)}
 
@@ -823,10 +869,94 @@ async function connectToKey() {
 }
 function fmtDate(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR')}
 function prevMonth(){current.setMonth(current.getMonth()-1);render()}function nextMonth(){current.setMonth(current.getMonth()+1);render()}
-function openModal(date){document.getElementById('modalTitle').textContent='Novo post';['postId','title','hook','copy','visual','cta','owner','notes','assetData','assetType','assetFileName','assetItems'].forEach(id=>document.getElementById(id).value='');document.getElementById('assetFile').value='';setAssetThumb('', '', 'Nenhuma arte enviada ainda.', '');document.getElementById('date').value=date||new Date().toISOString().slice(0,10);document.getElementById('time').value='09:00';document.getElementById('platform').value='Instagram';document.getElementById('type').value='Reels';document.getElementById('phase').value='Autoridade';document.getElementById('status').value='Ideia';document.getElementById('sponsor').value='nao';document.getElementById('priority').value='Normal';document.getElementById('modalBackdrop').classList.add('show');updatePostPreview()}
+function openModal(date){
+  document.getElementById('modalTitle').textContent='Novo post';
+  ['postId','title','hook','copy','visual','cta','owner','notes','assetData','assetType','assetFileName','assetItems','refText','refImage','refLink'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('assetFile').value='';
+  setAssetThumb('', '', 'Nenhuma arte enviada ainda.', '');
+  document.getElementById('date').value=date||new Date().toISOString().slice(0,10);
+  document.getElementById('time').value='09:00';
+  document.getElementById('platform').value='Instagram';
+  document.getElementById('type').value='Reels';
+  document.getElementById('phase').value='Autoridade';
+  document.getElementById('status').value='Ideia';
+  document.getElementById('sponsor').value='nao';
+  document.getElementById('priority').value='Normal';
+  document.getElementById('refImagePreviewContainer').style.display = 'none';
+  document.getElementById('modalBackdrop').classList.add('show');
+  updatePostPreview();
+}
 function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
-function editPost(id){const p=posts.find(x=>x.id==id);if(!p)return;document.getElementById('modalTitle').textContent='Editar post';['postId','date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems'].forEach(k=>document.getElementById(k).value=p[k]||'');document.getElementById('postId').value=p.id;document.getElementById('assetFile').value='';setAssetThumb(p.assetData,p.assetType,p.assetFileName,p.assetItems||'');document.getElementById('modalBackdrop').classList.add('show');updatePostPreview()}
-function savePost(){const p={};['date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems'].forEach(k=>p[k]=document.getElementById(k).value);const existingId=document.getElementById('postId').value;if(existingId){const old=posts.find(x=>x.id==existingId);if(old){['feedPos','feedPosFeed','feedPosReels'].forEach(k=>{if(old[k]!==undefined)p[k]=old[k]})}}const id=document.getElementById('postId').value;if(id){const i=posts.findIndex(x=>x.id==id);posts[i]={...posts[i],...p}}else{p.id='p'+Date.now();posts.push(p)}save();closeModal();render()}
+
+function updateRefImagePreview() {
+  const url = document.getElementById('refImage').value.trim();
+  const container = document.getElementById('refImagePreviewContainer');
+  const img = document.getElementById('refImagePreview');
+  if (!container || !img) return;
+  if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image'))) {
+    img.src = url;
+    container.style.display = 'block';
+  } else {
+    img.src = '';
+    container.style.display = 'none';
+  }
+}
+
+function openRefLink() {
+  const url = document.getElementById('refLink').value.trim();
+  if (url) {
+    if (!/^https?:\/\//i.test(url)) {
+      window.open('https://' + url, '_blank');
+    } else {
+      window.open(url, '_blank');
+    }
+  } else {
+    alert('Insira uma URL válida primeiro.');
+  }
+}
+function editPost(id){
+  const p=posts.find(x=>x.id==id);
+  if(!p)return;
+  document.getElementById('modalTitle').textContent='Editar post';
+  ['postId','date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems','refText','refImage','refLink'].forEach(k=>{
+    const el = document.getElementById(k);
+    if (el) el.value = p[k] || '';
+  });
+  document.getElementById('postId').value=p.id;
+  document.getElementById('assetFile').value='';
+  setAssetThumb(p.assetData,p.assetType,p.assetFileName,p.assetItems||'');
+  updateRefImagePreview();
+  document.getElementById('modalBackdrop').classList.add('show');
+  updatePostPreview();
+}
+function savePost(){
+  const p={};
+  ['date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems','refText','refImage','refLink'].forEach(k=>{
+    const el = document.getElementById(k);
+    if (el) p[k] = el.value;
+  });
+  const existingId=document.getElementById('postId').value;
+  if(existingId){
+    const old=posts.find(x=>x.id==existingId);
+    if(old){
+      ['feedPos','feedPosFeed','feedPosReels'].forEach(k=>{if(old[k]!==undefined)p[k]=old[k]})
+    }
+  }
+  const id=document.getElementById('postId').value;
+  if(id){
+    const i=posts.findIndex(x=>x.id==id);
+    posts[i]={...posts[i],...p}
+  }else{
+    p.id='p'+Date.now();
+    posts.push(p)
+  }
+  save();
+  closeModal();
+  render();
+}
 function duplicatePost(){const id=document.getElementById('postId').value;if(!id){savePost();return}const p=posts.find(x=>x.id==id);const n={...p,id:'p'+Date.now(),title:p.title+' (cópia)',status:'Ideia'};posts.push(n);save();closeModal();render()}
 async function deletePost(){
   const id=document.getElementById('postId').value;
@@ -894,7 +1024,11 @@ function removeAssetSlide(index){
   updatePostPreview();
 }
 function removeAsset(){document.getElementById('assetData').value='';document.getElementById('assetType').value='';document.getElementById('assetFileName').value='';document.getElementById('assetItems').value='';document.getElementById('assetFile').value='';setAssetThumb('', '', 'Nenhuma arte enviada ainda.', '');updatePostPreview()}
-function currentFormPost(){const p={};['date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems'].forEach(k=>p[k]=document.getElementById(k)?.value||'');return p}
+function currentFormPost(){
+  const p={};
+  ['date','time','platform','type','phase','status','title','hook','copy','visual','cta','sponsor','priority','owner','notes','assetData','assetType','assetFileName','assetItems','refText','refImage','refLink'].forEach(k=>p[k]=document.getElementById(k)?.value||'');
+  return p;
+}
 function mediaTag(it,idx){return it.type&&it.type.startsWith('video/')?`<video src="${it.data}" controls muted playsinline></video>`:`<img src="${it.data}" alt="Arte ${idx+1}">`}
 function carouselHTML(items){return `<div class="carouselMock" data-index="0">${items.map((it,i)=>`<div class="carouselSlide ${i===0?'active':''}">${mediaTag(it,i)}</div>`).join('')}${items.length>1?`<button type="button" class="carouselNav prev" onclick="carouselMove(this,-1,event)">‹</button><button type="button" class="carouselNav next" onclick="carouselMove(this,1,event)">›</button><div class="carouselCount">1/${items.length}</div><div class="carouselDots">${items.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>`:''}</div>`}
 function carouselMove(btn,dir,event){if(event){event.preventDefault();event.stopPropagation()}const box=btn.closest('.carouselMock');if(!box)return;const slides=[...box.querySelectorAll('.carouselSlide')];if(!slides.length)return;let idx=parseInt(box.dataset.index||'0',10);idx=(idx+dir+slides.length)%slides.length;box.dataset.index=idx;slides.forEach((s,i)=>s.classList.toggle('active',i===idx));box.querySelectorAll('.carouselDots span').forEach((d,i)=>d.classList.toggle('active',i===idx));const c=box.querySelector('.carouselCount');if(c)c.textContent=(idx+1)+'/'+slides.length}
