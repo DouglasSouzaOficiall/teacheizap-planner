@@ -531,7 +531,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Gerenciamento de Usuário do Supabase
 let userId = localStorage.getItem('tz_supabase_user_id');
 if (!userId) {
-  userId = 'user_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  // Define a sua chave de sincronização como o padrão do site para qualquer novo acesso
+  userId = 'user_3m2eoepg7i4km2rmf5y36';
   localStorage.setItem('tz_supabase_user_id', userId);
 }
 
