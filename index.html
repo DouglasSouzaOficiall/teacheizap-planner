@@ -418,6 +418,52 @@
     .feedTile.dragging{opacity:.45;outline:3px solid var(--brand)}
     .feedTile.dropTarget{outline:3px solid var(--brand);transform:scale(.98)}
     .reorderHint{font-size:13px;color:var(--muted);margin-top:8px}.feedTile .orderTag{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.52);color:#fff;font-size:10px;border-radius:999px;padding:3px 7px;font-weight:900}
+    #textEditModalBackdrop.show {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+    #textEditModalBackdrop .modal {
+      width: 100%;
+      max-width: 720px;
+      min-height: auto;
+      height: 80vh;
+      max-height: 90vh;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      padding: 24px;
+      margin: auto;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.45);
+    }
+    #textEditModalBackdrop .modalHeader {
+      margin: -24px -24px 18px;
+      padding: 22px 24px 14px;
+      position: relative;
+    }
+
+    body.light #textEditModalBackdrop .modal {
+      background: #ffffff;
+      border-color: rgba(0, 124, 60, 0.18);
+      box-shadow: 0 20px 60px rgba(14, 60, 34, 0.08);
+    }
+    body.light #textEditModalBackdrop .modalHeader {
+      background: linear-gradient(180deg, #ffffff, #f0f8f3);
+      border-bottom: 1px solid rgba(0, 124, 60, 0.1);
+    }
+    #modalEditText {
+      flex: 1;
+      resize: none;
+      font-size: 16px;
+      padding: 16px;
+      line-height: 1.6;
+      border-radius: 15px;
+      font-family: inherit;
+      outline: none;
+      min-height: 200px;
+    }
 
     @media print{.sidebar,.actions,.filters,.modalBackdrop{display:none!important}.app{display:block}.main{padding:0}.day{break-inside:avoid}.calendar{gap:5px}.postpill{border-color:#999;color:#000;background:#eee}body{background:white;color:#000}.stat,.day,.tablewrap,.col,.card,.help,.phase,.topbar{box-shadow:none;background:white;color:#000;border-color:#999}.badge{color:#000}}
 </style>
@@ -479,21 +525,21 @@
       <div><label>Status</label><select id="status"><option>Ideia</option><option>Produzindo</option><option>Agendado</option><option>Publicado</option></select></div>
       <div class="full"><label>Título</label><input id="title" placeholder="Ex: Você conhece alguém que trabalha bem?"></div>
       <div class="full"><label>Gancho</label><input id="hook" placeholder="Primeira frase do vídeo/post"></div>
-      <div class="full"><label>Copy / legenda / mensagem</label><textarea id="copy"></textarea></div>
-      <div class="full"><label>Roteiro visual / cena</label><textarea id="visual"></textarea></div>
+      <div class="full"><label>Copy / legenda / mensagem</label><textarea id="copy" readonly onclick="openTextEditModal('copy', 'Escrever Roteiro / Legenda')" placeholder="Clique aqui para escrever o roteiro/copy em tela cheia..." style="cursor: pointer; background: rgba(255,255,255,0.02); min-height: 70px;"></textarea></div>
+      <div class="full"><label>Roteiro visual / cena</label><textarea id="visual" readonly onclick="openTextEditModal('visual', 'Escrever Roteiro Visual / Cenas')" placeholder="Clique aqui para escrever o roteiro visual em tela cheia..." style="cursor: pointer; background: rgba(255,255,255,0.02); min-height: 70px;"></textarea></div>
       <div class="full"><label>Arte pronta / criativo</label><div class="assetRow"><img id="assetThumb" class="assetThumb" alt="Prévia da arte"><input type="file" id="assetFile" accept="image/*,video/*" multiple onchange="handleAssetUpload(event)"><button type="button" class="miniLink" onclick="document.getElementById('assetFile').click()">Adicionar mais slides</button><button type="button" class="miniLink" onclick="removeAsset()">Remover tudo</button><span id="assetName" class="assetHint">Você pode selecionar vários arquivos de uma vez ou adicionar um por um. Para carrossel, cada imagem vira um slide.</span><input type="hidden" id="assetData"><input type="hidden" id="assetType"><input type="hidden" id="assetFileName"><input type="hidden" id="assetItems"></div></div>
       <div><label>CTA</label><input id="cta" placeholder="Comente EU CONHEÇO / Chame no WhatsApp"></div>
       <div><label>Patrocinar?</label><select id="sponsor"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
       <div><label>Prioridade</label><select id="priority"><option>Normal</option><option>Alta</option><option>Urgente</option></select></div>
       <div><label>Responsável</label><input id="owner" placeholder="Douglas / Designer / Editor"></div>
-      <div class="full"><label>Observações</label><textarea id="notes"></textarea></div>
+      <div class="full"><label>Observações</label><textarea id="notes" readonly onclick="openTextEditModal('notes', 'Escrever Observações')" placeholder="Clique aqui para escrever as observações em tela cheia..." style="cursor: pointer; background: rgba(255,255,255,0.02); min-height: 70px;"></textarea></div>
       
       <!-- Seção de Referências e Inspirações -->
       <div class="full" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 14px;">
         <div style="grid-column: 1 / -1;"><h4 style="margin: 0 0 4px 0; color: var(--brand);">Referências & Inspirações</h4></div>
         <div class="full" style="grid-column: 1 / -1;">
           <label>Ideia de Referência / Inspiração</label>
-          <textarea id="refText" placeholder="Descreva aqui o conceito da referência, paleta de cores, inspirações..."></textarea>
+          <textarea id="refText" readonly onclick="openTextEditModal('refText', 'Escrever Detalhes da Referência')" placeholder="Clique aqui para descrever os detalhes em tela cheia..." style="cursor: pointer; background: rgba(255,255,255,0.02); min-height: 70px;"></textarea>
         </div>
         <div>
           <label>Imagem de Referência (URL)</label>
@@ -520,6 +566,24 @@
 </div>
 <div class="hoverPreview" id="hoverPreview"></div>
 <div class="postPreviewScreen" id="postPreviewScreen"></div>
+
+<!-- Modal para Edição de Roteiro / Texto Longo Expandido -->
+<div class="modalBackdrop" id="textEditModalBackdrop" style="z-index: 150;">
+  <div class="modal" style="width: 100%; max-width: 720px; min-height: auto; height: 80vh; max-height: 90vh; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); padding: 24px; margin: auto;">
+    <div class="modalHeader" style="margin: -24px -24px 18px; padding: 22px 24px 14px; position: relative;">
+      <h3 id="textEditModalTitle">Escrever Conteúdo</h3>
+      <button class="close" onclick="closeTextEditModal()">×</button>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 10px 0;">
+      <label for="modalEditText" style="text-transform: none; font-size: 14px;">Digite o texto completo do seu roteiro ou copy:</label>
+      <textarea id="modalEditText" placeholder="Digite seu texto aqui..."></textarea>
+    </div>
+    <div class="actions" style="margin-top: 16px; justify-content: flex-end; display: flex; gap: 10px;">
+      <button class="btn" onclick="closeTextEditModal()">Cancelar</button>
+      <button class="btn primary" onclick="saveTextEditModal()">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
 <script>
 const BRAND_LOGO = "logo_oficial.png";
 
@@ -892,6 +956,36 @@ function openModal(date){
 }
 function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
 
+let activeTextInputId = null;
+
+function openTextEditModal(targetId, title) {
+  activeTextInputId = targetId;
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  document.getElementById('textEditModalTitle').textContent = title;
+  document.getElementById('modalEditText').value = el.value;
+  document.getElementById('textEditModalBackdrop').classList.add('show');
+  setTimeout(() => {
+    document.getElementById('modalEditText').focus();
+  }, 100);
+}
+
+function closeTextEditModal() {
+  document.getElementById('textEditModalBackdrop').classList.remove('show');
+  activeTextInputId = null;
+}
+
+function saveTextEditModal() {
+  if (!activeTextInputId) return;
+  const text = document.getElementById('modalEditText').value;
+  const el = document.getElementById(activeTextInputId);
+  if (el) {
+    el.value = text;
+    el.dispatchEvent(new Event('input'));
+  }
+  closeTextEditModal();
+}
+
 function updateRefImagePreview() {
   const url = document.getElementById('refImage').value.trim();
   const container = document.getElementById('refImagePreviewContainer');
@@ -1076,7 +1170,7 @@ async function resetSeed(){
   }
 }
 ['title','hook','copy','cta','platform'].forEach(id=>document.getElementById(id)?.addEventListener('input',updatePostPreview));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closePostPreview();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closePostPreview();closeTextEditModal();}});
 applyTheme();
 loadFromSupabase();
 </script>
